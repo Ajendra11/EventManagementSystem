@@ -1,11 +1,5 @@
--- ============================================================
--- EventHub Database Schema — Sprint 1
--- PHP 8.1+ | MySQL 8.0+ | InnoDB
--- Run: mysql -u root -p < database/schema.sql
--- ============================================================
-
-CREATE DATABASE IF NOT EXISTS eventhub_php_v1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE eventhub_php_v1;
+CREATE DATABASE IF NOT EXISTS eventhub_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE eventhub_db;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS audit_logs;
