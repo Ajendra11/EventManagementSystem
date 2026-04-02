@@ -17,5 +17,10 @@ function register_user(array $data): array
         $errors[] = 'Full name must be between 2 and 100 characters.';
     }
 
+    // Email validation
+    if (!validate_email($email)) {
+        $errors[] = 'Please enter a valid email address.';
+    }
+
     return $errors;
 }
