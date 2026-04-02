@@ -21,7 +21,7 @@ function register_user(array $data): array
     if (!validate_email($email)) {
         $errors[] = 'Please enter a valid email address.';
     }
-    
+
     // Password length check
     if (strlen($pass) < 8 || strlen($pass) > 64) {
     $errors[] = 'Password must be between 8 and 64 characters.';
@@ -35,6 +35,11 @@ function register_user(array $data): array
     // Confirm password
     if ($pass !== $confirm) {
     $errors[] = 'Passwords do not match.';
+    }
+
+    // Duplicate email check
+    if (find_user_by_email($email)) {
+        $errors[] = 'That email address is already registered.';
     }
 
     return $errors;
