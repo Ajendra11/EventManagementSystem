@@ -42,5 +42,20 @@ function register_user(array $data): array
         $errors[] = 'That email address is already registered.';
     }
 
-    return $errors;
+    if ($errors) {
+     return $errors;
+    }
+
+    // Insert user into database
+    db()->prepare(
+        'INSERT INTO users (full_name, email, password_hash, role, status, email_verified_at, created_at)
+        VALUES (:n, :e, :p, "participant", "active", NOW(), NOW())'
+    )->execute([
+        'n' => $name,
+        'e' => $email,
+        'p' => password_hash($pass, PASSWORD_BCRYPT, ['cost' => 12]),
+    ]);
+
+    return [];
+
 }
