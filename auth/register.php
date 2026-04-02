@@ -1,7 +1,16 @@
 <?php
 require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/auth.php';
+
+$errors = [];
+
+if (is_post()) {
+    $errors = register_user($_POST);
+}
+
 render_header('Create Account');
 ?>
+
 
 <div class="container">
     <form class="card form-card" method="post">
