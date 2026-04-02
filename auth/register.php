@@ -16,6 +16,13 @@ render_header('Create Account');
     <form class="card form-card" method="post">
         <h2>Create account</h2>
 
+        <?php foreach ($errors as $err): ?>
+        <div class="flash flash-error"><?= e($err) ?></div>
+        <?php endforeach; ?>
+
+        <input type="text" name="full_name" value="<?= old('full_name') ?>">
+        <input type="email" name="email" value="<?= old('email') ?>">
+
         <div class="form-group">
             <label>Full name</label>
             <input type="text" name="full_name">
