@@ -22,11 +22,12 @@ if (is_post()) {
 }
 
 $search = trim($_GET['q'] ?? '');
-$sql    = 'SELECT id, full_name, email, role, status, failed_login_attempts, locked_until, created_at FROM users';
+$sql = 'SELECT id, full_name, email, role, status, failed_login_attempts, locked_until, created_at FROM users';
 $params = [];
 if ($search) {
-    $sql .= ' WHERE full_name LIKE :q OR email LIKE :q';
-    $params['q'] = '%' . $search . '%';
+    $sql .= ' WHERE full_name LIKE :q1 OR email LIKE :q2';
+    $params['q1'] = '%' . $search . '%';
+    $params['q2'] = '%' . $search . '%';
 }
 $sql .= ' ORDER BY created_at DESC';
 $stmt = $pdo->prepare($sql);
