@@ -59,3 +59,57 @@ function register_user(array $data): array
     return [];
 
 }
+
+function is_account_locked(array $user): bool
+{
+    return !empty($user['locked_until']) && strtotime($user['locked_until']) > time();
+}
+
+function record_failed_attempt(array $user): void
+{
+    $count = (int)$user['failed_login_attempts'] + 1;
+    $lock  = null;
+
+    if ($count >= 5) {
+        $lock  = date('Y-m-d H:i:s', time() + 900); // 15 min
+        $count = 0;
+    }
+
+    db()->prepare("UPDATE users SET failed_login_attempts = :c, locked_until = :l WHERE id = :id")
+        ->execute(['c' => $count, 'l' => $lock, 'id' => $user['id']]);
+}
+
+function reset_attempts(array $user): void
+{
+    db()->prepare("UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = :id")
+        ->execute(['id' => $user['id']]);
+}
+
+function attempt_login(string $email, string $password): array
+{
+    $user = find_user_by_email($email);
+
+    if (!$user) {
+        return ["Invalid email or password."];
+    }
+
+    if (is_account_locked($user)) {
+        return ["Account locked. Try again later."];
+    }
+
+    if (!password_verify($password, $user['password_hash'])) {
+        record_failed_attempt($user);
+        return ["Invalid email or password."];
+    }
+
+    if ($user['status'] !== 'active') {
+        return ["Account inactive."];
+    }
+
+    reset_attempts($user);
+
+    // session regenerate
+    login_user($user);
+
+    return [];
+}

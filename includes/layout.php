@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-require_once DIR . '/functions.php';
+require_once __DIR__ . '/functions.php';
 
 function render_header(string $title = APP_NAME): void
 {
@@ -21,6 +21,7 @@ function render_header(string $title = APP_NAME): void
             <a class="brand" href="<?= APP_URL ?>/index.php"><?= e(APP_NAME) ?></a>
             <nav class="nav-links">
                 <a href="<?= APP_URL ?>/index.php">Home</a>
+                 <a href="<?= APP_URL ?>/events/index.php">Events</a>
                 <a href="<?= APP_URL ?>/auth/login.php">Login</a>
                 <a class="btn btn-sm btn-primary" href="<?= APP_URL ?>/auth/register.php">Create Account</a>
             </nav>
