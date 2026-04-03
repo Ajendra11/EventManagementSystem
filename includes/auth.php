@@ -59,3 +59,32 @@ function register_user(array $data): array
     return [];
 
 }
+
+function attempt_login(string $email, string $password): array
+{
+    $user = find_user_by_email($email);
+
+    if (!$user) {
+        return ["Invalid email or password."];
+    }
+
+    if (is_account_locked($user)) {
+        return ["Account locked. Try again later."];
+    }
+
+    if (!password_verify($password, $user['password_hash'])) {
+        record_failed_attempt($user);
+        return ["Invalid email or password."];
+    }
+
+    if ($user['status'] !== 'active') {
+        return ["Account inactive."];
+    }
+
+    reset_attempts($user);
+
+    // session regenerate
+    login_user($user);
+
+    return [];
+}
