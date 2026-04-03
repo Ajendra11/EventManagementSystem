@@ -199,4 +199,3 @@ function render_footer(): void
     </html>
     <?php
 }
-
