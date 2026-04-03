@@ -3,49 +3,46 @@ require_once __DIR__ . '/../includes/layout.php';
 require_once __DIR__ . '/../includes/auth.php';
 
 if (is_logged_in()) {
-    redirect('index.php');
+    redirect(is_admin() ? 'admin/index.php' : 'index.php');
 }
 
 $errors = [];
-
 if (is_post()) {
     verify_csrf();
-
     $errors = attempt_login($_POST['email'] ?? '', $_POST['password'] ?? '');
-
     if (!$errors) {
-        flash('success', 'Login successful!');
-        redirect('index.php');
+        flash('success', 'Welcome back, ' . (auth_user()['name'] ?? '') . '!');
+        redirect(is_admin() ? 'admin/index.php' : 'index.php');
     }
 }
 
-render_header('Login');
+render_header('Sign In');
 ?>
-
 <div class="container">
-<form class="card form-card" method="post" data-validate="true">
+    <form class="card form-card" method="post" data-validate="true">
+        <h2>Sign in</h2>
+        <p class="muted">Access your account.</p>
 
-<h2>Login</h2>
+        <?php foreach ($errors as $err): ?>
+            <div class="flash flash-error"><?= e($err) ?></div>
+        <?php endforeach; ?>
 
-<?php foreach ($errors as $e): ?>
-<div class="flash flash-error"><?= e($e) ?></div>
-<?php endforeach; ?>
+        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
 
-<input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" type="email" name="email" data-required="true" data-label="Email"
+                   value="<?= old('email') ?>" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password" data-required="true" data-label="Password"
+                   autocomplete="current-password">
+        </div>
 
-<div class="form-group">
-<label>Email</label>
-<input type="email" name="email" data-required="true">
+        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+        <p class="auth-note">Don't have an account? <a href="<?= APP_URL ?>/auth/register.php">Register here</a></p>
+        <p class="auth-note"><a href="<?= APP_URL ?>/admin/login.php">Admin portal &rarr;</a></p>
+    </form>
 </div>
-
-<div class="form-group">
-<label>Password</label>
-<input type="password" name="password" data-required="true">
-</div>
-
-<button type="submit" class="btn btn-primary btn-block">Login</button>
-
-</form>
-</div>
-
 <?php render_footer(); ?>
