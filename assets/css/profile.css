@@ -1,0 +1,308 @@
+/* =====================================
+   auth/profile.php only
+   compact professional settings page
+   ===================================== */
+
+body.page-auth-profile-php {
+  background: #f5f6f8;
+  color: #111827;
+}
+
+body.page-auth-profile-php::before {
+  display: none;
+}
+
+body.page-auth-profile-php .site-header {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid #e7ebf0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+body.page-auth-profile-php .site-footer {
+  background: transparent;
+  border-top: 0;
+}
+
+body.page-auth-profile-php .settings-shell {
+  max-width: 960px;
+  margin: 1.35rem auto 2rem;
+  padding: 0 0.85rem;
+  display: grid;
+  grid-template-columns: 420px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+body.page-auth-profile-php .settings-menu-column,
+body.page-auth-profile-php .settings-detail-stack {
+  min-width: 0;
+}
+
+body.page-auth-profile-php .settings-profile-card,
+body.page-auth-profile-php .settings-card,
+body.page-auth-profile-php .settings-form-panel {
+  background: #ffffff;
+  border: 1px solid #e9edf3;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+body.page-auth-profile-php .settings-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0.9rem 0.85rem;
+  margin-bottom: 0.7rem;
+}
+
+body.page-auth-profile-php .settings-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f43f8f, #ec4899);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+  margin-bottom: 0.55rem;
+}
+
+body.page-auth-profile-php .settings-profile-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #111827;
+}
+
+body.page-auth-profile-php .settings-profile-email {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #6b7280;
+  word-break: break-word;
+}
+
+body.page-auth-profile-php .settings-group {
+  margin-bottom: 0.7rem;
+}
+
+body.page-auth-profile-php .settings-group-title {
+  margin: 0 0 0.35rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+body.page-auth-profile-php .settings-card {
+  overflow: hidden;
+}
+
+body.page-auth-profile-php .settings-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 44px;
+  padding: 0.72rem 0.85rem;
+  border-bottom: 1px solid #f1f3f6;
+  color: #111827;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+body.page-auth-profile-php .settings-row:last-child {
+  border-bottom: none;
+}
+
+body.page-auth-profile-php .settings-row:hover {
+  background: #fafbfc;
+}
+
+body.page-auth-profile-php .settings-row:focus-visible {
+  outline: 2px solid rgba(236, 72, 153, 0.18);
+  outline-offset: -2px;
+}
+
+body.page-auth-profile-php .settings-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+body.page-auth-profile-php .settings-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+body.page-auth-profile-php .settings-row-copy {
+  font-size: 0.89rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #111827;
+}
+
+body.page-auth-profile-php .settings-row-end {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+body.page-auth-profile-php .settings-value {
+  font-size: 0.77rem;
+  color: #6b7280;
+}
+
+body.page-auth-profile-php .settings-value-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #ec4899;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+body.page-auth-profile-php .settings-chevron {
+  font-size: 1rem;
+  line-height: 1;
+  color: #9ca3af;
+}
+
+body.page-auth-profile-php .settings-row-danger .settings-row-copy,
+body.page-auth-profile-php .settings-row-danger .settings-icon {
+  color: #dc2626;
+}
+
+body.page-auth-profile-php .settings-row-danger .settings-icon {
+  background: #fef2f2;
+}
+
+body.page-auth-profile-php .settings-row-danger:hover {
+  background: #fff7f7;
+}
+
+body.page-auth-profile-php .settings-detail-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
+body.page-auth-profile-php .settings-form-panel {
+  padding: 0.95rem;
+}
+
+body.page-auth-profile-php .settings-form-head {
+  margin-bottom: 0.8rem;
+}
+
+body.page-auth-profile-php .settings-form-head h2 {
+  margin: 0 0 0.22rem;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+body.page-auth-profile-php .settings-form-head p,
+body.page-auth-profile-php .settings-helper {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #6b7280;
+}
+
+body.page-auth-profile-php .form-group {
+  margin-bottom: 0.8rem;
+}
+
+body.page-auth-profile-php label {
+  display: block;
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+body.page-auth-profile-php input,
+body.page-auth-profile-php select,
+body.page-auth-profile-php textarea {
+  width: 100%;
+  padding: 0.72rem 0.8rem;
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 0.86rem;
+  box-shadow: none;
+}
+
+body.page-auth-profile-php input:focus,
+body.page-auth-profile-php select:focus,
+body.page-auth-profile-php textarea:focus {
+  outline: none;
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
+body.page-auth-profile-php .btn,
+body.page-auth-profile-php button {
+  border-radius: 10px;
+}
+
+body.page-auth-profile-php .btn-primary {
+  box-shadow: none;
+}
+
+body.page-auth-profile-php .settings-danger-panel {
+  border-color: #fecaca;
+}
+
+body.page-auth-profile-php .flash,
+body.page-auth-profile-php .alert {
+  border-radius: 10px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  body.page-auth-profile-php .settings-shell {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  body.page-auth-profile-php .settings-shell {
+    margin: 1rem auto 1.5rem;
+    padding: 0 0.7rem;
+  }
+
+  body.page-auth-profile-php .settings-profile-card,
+  body.page-auth-profile-php .settings-form-panel {
+    padding: 0.9rem;
+  }
+
+  body.page-auth-profile-php .settings-row {
+    min-height: 42px;
+    padding: 0.68rem 0.8rem;
+  }
+
+  body.page-auth-profile-php .settings-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 1.35rem;
+  }
+}
