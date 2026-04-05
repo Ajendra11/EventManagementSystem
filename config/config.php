@@ -42,7 +42,7 @@ define('MAIL_LOG', dirname(__DIR__) . '/logs/mail.log');
 // ── Bootstrap session ─────────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
-    session_set_cookie_params([
+    session_set_cookie_params([git
         'lifetime' => 0,
         'path'     => '/',
         'domain'   => '',
