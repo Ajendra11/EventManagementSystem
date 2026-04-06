@@ -1,0 +1,79 @@
+/* booking details table */
+.container.section .info-table{
+  width:100%;
+  max-width:760px;
+  border-collapse:collapse;
+  margin:8px 0 20px;
+  table-layout:fixed;
+}
+
+/* each row */
+.container.section .info-table tr{
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+/* left side label box */
+.container.section .info-table th{
+  width:170px !important;
+  padding:14px 18px !important;
+  text-align:left;
+  vertical-align:middle;
+
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+  color:rgba(202,211,245,.72);
+
+  font-size:.82rem;
+  font-weight:800;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+/* right side value */
+.container.section .info-table td{
+  padding:14px 18px !important;
+  text-align:left;
+  vertical-align:middle;
+
+  color:#eef2ff;
+  font-size:.98rem;
+  font-weight:600;
+}
+
+/* reduce row height */
+.container.section .info-table th,
+.container.section .info-table td{
+  line-height:1.2;
+}
+
+/* first and last row corners */
+.container.section .info-table tr:first-child th{
+  border-top-left-radius:14px;
+}
+.container.section .info-table tr:first-child td{
+  border-top-right-radius:14px;
+}
+.container.section .info-table tr:last-child th{
+  border-bottom-left-radius:14px;
+}
+.container.section .info-table tr:last-child td{
+  border-bottom-right-radius:14px;
+}
+
+/* slightly softer value area */
+.container.section .info-table td{
+  background:transparent;
+}
+
+/* mobile */
+@media (max-width: 700px){
+  .container.section .info-table th{
+    width:135px !important;
+    padding:12px 14px !important;
+    font-size:.76rem;
+  }
+
+  .container.section .info-table td{
+    padding:12px 14px !important;
+    font-size:.92rem;
+  }
+}
