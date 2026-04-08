@@ -1,5 +1,7 @@
 CREATE DATABASE IF NOT EXISTS eventhub_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE eventhub_db;
+USE eventhub_db;//database created and selected
+
+
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS audit_logs;
@@ -126,5 +128,5 @@ CREATE TABLE audit_logs (
 ) ENGINE=InnoDB;
 
 INSERT INTO users (full_name, email, password_hash, role, status, email_verified_at) VALUES
-('System Admin', 'admin@eventhub.local', '$2y$12$tfy95b4Xto48bcFJ4/dZf.brqgi3tn3.RpemEwJBbs2XGUsHlZpMu', 'admin', 'active', NOW()),
+('System Admin', 'admin@eventhub.local', '$2y$12$tfy95b4Xto48bcFJ4/dZf.brqgi3tn3.RpemEwJBbs2XGUsHlZpMu', 'admin', 'active', NOW()),//password: Admin@123
 ('Demo Participant', 'participant@eventhub.local', '$2y$12$hYup6LLERoseyne83IVXZu/ot/rMXzsTMJY9qkPpESWLaPKTzkUzu', 'participant', 'active', NOW());
