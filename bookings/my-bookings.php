@@ -40,6 +40,9 @@ render_header('My Bookings');
         <div class="bookings-list">
             <?php foreach ($bookings as $b): ?>
                 <?php
+                // Check if this booking can be cancelled
+                [$eligible, $reason] = is_cancellation_eligible($b);
+
                 // Determine badge color based on booking status
                 $badgeClass = match ($b['status']) {
                     'Confirmed' => 'success',
@@ -98,6 +101,29 @@ render_header('My Bookings');
                             <td><?= e(substr($b['booking_date'], 0, 16)) ?></td>
                         </tr>
                     </table>
+
+                    <div class="booking-actions">
+                        <?php if ($eligible): ?>
+                            <!-- Cancel form — only shown for eligible upcoming confirmed bookings -->
+                            <form
+                                method="post"
+                                action="<?= APP_URL ?>/bookings/cancel.php"
+                                onsubmit="return confirm('Cancel this booking? Your seat will be released.');"
+                            >
+                                <!-- CSRF token to protect against cross-site request forgery -->
+                                <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                <!-- Booking ID to identify which booking to cancel -->
+                                <input type="hidden" name="booking_id" value="<?= (int) $b['id'] ?>">
+                                <button class="btn btn-danger btn-sm" type="submit">Cancel Booking</button>
+                            </form>
+
+                        <?php elseif ($b['status'] === 'Confirmed' && !$isPast): ?>
+                            <!-- Show reason why cancellation is not allowed -->
+                            <span class="muted booking-note" title="<?= e($reason) ?>">
+                                Not eligible for cancellation
+                            </span>
+                        <?php endif; ?>
+                    </div>
 
                 </article>
 
