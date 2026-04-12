@@ -1,17 +1,114 @@
 @import url("./base-core.css");
-.container.section > .grid-2{grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);align-items:start}
-.container.section article.panel{padding:30px}
-.container.section article.panel img{border-radius:24px !important;margin-bottom:20px !important;box-shadow:var(--shadow-md);min-height:300px;object-fit:cover}
-.container.section article.panel h1{font-size:clamp(2.1rem,4vw,3.25rem) !important;letter-spacing:-.04em}
-.container.section aside > .panel:first-child{padding:26px;position:relative;overflow:hidden}
-.container.section aside > .panel:first-child::after{
-  content:"";position:absolute;inset:auto -40px -40px auto;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle, rgba(139,92,246,.18), transparent 68%)
+
+.container.section > .grid-2 {
+  grid-template-columns: minmax(0, 1.22fr) minmax(300px, 0.58fr);
+  align-items: start;
+  gap: 20px;
 }
-#booking-form input[type=number]{font-size:1.08rem;font-weight:700}
-#booking-form .btn-primary{min-height:54px;font-size:1rem}
-.container.section > div[style*="margin-top:2.5rem"] > .status-row h2{font-size:1.7rem;margin:0}
-.container.section > div[style*="display:flex;flex-direction:column"] .panel{padding:22px !important}
-@media (max-width:980px){
-  .container.section > .grid-2{grid-template-columns:1fr}
-  .container.section aside[style]{position:static !important}
+
+.container.section article.panel {
+  padding: 24px;
+}
+
+.container.section article.panel img {
+  border-radius: 22px !important;
+  margin-bottom: 18px !important;
+  box-shadow: var(--shadow-md);
+  min-height: 260px;
+  max-height: 700px;
+  object-fit: cover;
+}
+
+.container.section article.panel h1 {
+  font-size: clamp(1.8rem, 3.2vw, 2.7rem) !important;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  margin-bottom: 14px;
+}
+
+.container.section article.panel p {
+  font-size: 0.96rem;
+}
+
+.container.section aside > .panel:first-child {
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.container.section aside > .panel:first-child::after {
+  content: "";
+  position: absolute;
+  inset: auto -40px -40px auto;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 68%);
+}
+
+.container.section aside .panel h2,
+.container.section aside .panel h3 {
+  font-size: 1.45rem;
+  margin-bottom: 14px;
+}
+
+.info-table th,
+.info-table td {
+  padding: 12px 0;
+  font-size: 0.92rem;
+}
+
+.price-tag {
+  font-size: 1rem;
+}
+
+#booking-form input[type="number"] {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+#booking-form .btn-primary {
+  min-height: 50px;
+  font-size: 0.96rem;
+}
+
+.container.section > div[style*="margin-top:2.5rem"] > .status-row h2 {
+  font-size: 1.45rem;
+  margin: 0;
+}
+
+.container.section > div[style*="display:flex;flex-direction:column"] .panel {
+  padding: 20px !important;
+}
+
+@media (max-width: 1200px) {
+  .container.section > .grid-2 {
+    grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.62fr);
+    gap: 18px;
+  }
+
+  .container.section article.panel img {
+    max-height: 620px;
+  }
+}
+
+@media (max-width: 980px) {
+  .container.section > .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .container.section aside[style] {
+    position: static !important;
+  }
+
+  .container.section article.panel img {
+    max-height: 420px;
+    min-height: 220px;
+  }
+
+  .container.section article.panel,
+  .container.section aside > .panel:first-child {
+    padding: 20px;
+  }
 }
