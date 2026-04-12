@@ -1,259 +1,268 @@
-document.addEventListener("DOMContentLoaded", function () {
-  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,64}$/;
+/**
+ * EventHub — client-side validation & UI enhancements
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    var body = document.body;
 
-  //Inline error helpers
-  function getOrCreateErrorEl(field) {
-    var group = field.closest(".form-group");
-    if (!group) return null;
-    var el = group.querySelector(".field-error");
-    if (!el) {
-      el = document.createElement("span");
-      el.className = "field-error";
-      el.setAttribute("aria-live", "polite");
-      el.style.cssText =
-        "display:block;margin-top:.35rem;font-size:.84rem;font-weight:600;color:#b91c1c;";
-      group.appendChild(el);
-    }
-    return el;
-  }
+    // ── Form validation ───────────────────────────────────────────
+    document.querySelectorAll('form[data-validate="true"]').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            var errors = [];
 
-  function setError(field, msg) {
-    field.style.borderColor = "#dc2626";
-    field.setAttribute("aria-invalid", "true");
-    var el = getOrCreateErrorEl(field);
-    if (el) el.textContent = msg;
-  }
+            form.querySelectorAll('[data-required="true"]').forEach(function (field) {
+                if (!field.value.trim()) {
+                    var label = field.getAttribute('data-label') || field.name || 'Field';
+                    errors.push(label + ' is required.');
+                    field.style.borderColor = '#dc2626';
+                } else {
+                    field.style.borderColor = '';
+                }
+            });
 
-  function clearError(field) {
-    field.style.borderColor = "";
-    field.removeAttribute("aria-invalid");
-    var el = getOrCreateErrorEl(field);
-    if (el) el.textContent = "";
-  }
+            var pass = form.querySelector('input[name="password"], input[name="new_password"]');
+            var confirm = form.querySelector('input[name="confirm_password"], input[name="confirm_new_password"]');
 
-  //Single-field validation
-  function validateField(field) {
-    var label = field.getAttribute("data-label") || field.name || "This field";
-    var value = field.value.trim();
-    var type = (field.getAttribute("type") || "").toLowerCase();
-    var name = (field.name || "").toLowerCase();
+            if (pass && confirm && pass.value && confirm.value && pass.value !== confirm.value) {
+                errors.push('Passwords do not match.');
+                confirm.style.borderColor = '#dc2626';
+            }
 
-    if (field.getAttribute("data-required") === "true" && !value)
-      return label + " is required.";
+            var qtyField = form.querySelector('input[name="quantity"]');
+            if (qtyField) {
+                var qty = parseInt(qtyField.value, 10);
+                var max = parseInt(qtyField.getAttribute('max') || '10', 10);
 
-    if (type === "email" && value && !EMAIL_RE.test(value))
-      return "Please enter a valid email address.";
+                if (isNaN(qty) || qty < 1) {
+                    errors.push('Please select at least 1 seat.');
+                } else if (qty > max) {
+                    errors.push('Maximum ' + max + ' seat(s) allowed per booking.');
+                }
+            }
 
-    // Complexity check for new passwords only
-    if (
-      (name === "password" || name === "new_password") &&
-      value &&
-      !PASSWORD_RE.test(value)
-    )
-      return (
-        label +
-        " must be 8-64 characters with uppercase, lowercase, a number, and a special character."
-      );
+            var starPicker = form.querySelector('.star-picker');
+            if (starPicker && !form.querySelector('.star-picker input[type=radio]:checked')) {
+                errors.push('Please select a star rating.');
+            }
 
-    return "";
-  }
-
-  //Password match check
-  function checkPasswordMatch(form) {
-    var pass = form.querySelector(
-      'input[name="password"], input[name="new_password"]',
-    );
-    var confirm = form.querySelector(
-      'input[name="confirm_password"], input[name="confirm_new_password"]',
-    );
-    if (!pass || !confirm) return true;
-    if (pass.value && confirm.value && pass.value !== confirm.value) {
-      setError(confirm, "Passwords do not match.");
-      return false;
-    }
-    clearError(confirm);
-    return true;
-  }
-
-  //Wire up validated forms
-  document
-    .querySelectorAll('form[data-validate="true"]')
-    .forEach(function (form) {
-      var watchedFields = form.querySelectorAll(
-        '[data-required="true"], [type="email"], input[name="password"], input[name="new_password"]',
-      );
-
-      // Submit: validate all, block if errors
-      form.addEventListener("submit", function (e) {
-        var valid = true;
-
-        watchedFields.forEach(function (field) {
-          var msg = validateField(field);
-          if (msg) {
-            setError(field, msg);
-            valid = false;
-          } else {
-            clearError(field);
-          }
+            if (errors.length) {
+                e.preventDefault();
+                alert(errors.join('\n'));
+            }
         });
 
-        if (!checkPasswordMatch(form)) valid = false;
-
-        // Quantity check
-        var qtyField = form.querySelector('input[name="quantity"]');
-        if (qtyField) {
-          var qty = parseInt(qtyField.value, 10);
-          var max = parseInt(qtyField.getAttribute("max") || "10", 10);
-          if (isNaN(qty) || qty < 1) {
-            setError(qtyField, "Please select at least 1 seat.");
-            valid = false;
-          } else if (qty > max) {
-            setError(
-              qtyField,
-              "Maximum " + max + " seat(s) allowed per booking.",
-            );
-            valid = false;
-          }
-        }
-
-        // Star rating check
-        var starPicker = form.querySelector(".star-picker");
-        if (
-          starPicker &&
-          !form.querySelector(".star-picker input[type=radio]:checked")
-        ) {
-          valid = false;
-          var starErr = starPicker.querySelector(".star-error");
-          if (!starErr) {
-            starErr = document.createElement("span");
-            starErr.className = "star-error field-error";
-            starErr.style.cssText =
-              "display:block;margin-top:.35rem;font-size:.84rem;font-weight:600;color:#b91c1c;";
-            starPicker.appendChild(starErr);
-          }
-          starErr.textContent = "Please select a star rating.";
-        }
-
-        if (!valid) {
-          e.preventDefault();
-          var firstBad = form.querySelector('[aria-invalid="true"]');
-          if (firstBad) {
-            firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
-            firstBad.focus();
-          }
-        }
-      });
-
-      // Blur: re-validate field when user leaves it
-      watchedFields.forEach(function (field) {
-        field.addEventListener("blur", function () {
-          var msg = validateField(field);
-          if (msg) setError(field, msg);
-          else clearError(field);
-          checkPasswordMatch(form);
+        form.querySelectorAll('[data-required="true"]').forEach(function (field) {
+            field.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    this.style.borderColor = '';
+                }
+            });
         });
-
-        // Input: clear error as user starts correcting
-        field.addEventListener("input", function () {
-          if (field.getAttribute("aria-invalid") === "true") clearError(field);
-        });
-      });
-
-      // Live password-match feedback on confirm field
-      var confirmField = form.querySelector(
-        'input[name="confirm_password"], input[name="confirm_new_password"]',
-      );
-      if (confirmField) {
-        confirmField.addEventListener("input", function () {
-          if (confirmField.value) checkPasswordMatch(form);
-          else clearError(confirmField);
-        });
-      }
     });
 
-  //Character counter for description textarea
-  document
-    .querySelectorAll('textarea[data-char-counter="true"], textarea[maxlength]')
-    .forEach(function (ta) {
-      var max = parseInt(
-        ta.getAttribute("data-maxlength") ||
-          ta.getAttribute("maxlength") ||
-          "0",
-        10,
-      );
-      var counter = document.createElement("small");
-      counter.className = "char-counter";
-      counter.style.cssText =
-        "display:block;text-align:right;margin-top:.3rem;font-size:.82rem;color:#6b7280;transition:color .15s;";
+    // ── Character counters ────────────────────────────────────────
+    document.querySelectorAll('textarea[maxlength]').forEach(function (ta) {
+        var counter = null;
+        var small = ta.nextElementSibling;
 
-      var next = ta.nextSibling;
-      next
-        ? ta.parentNode.insertBefore(counter, next)
-        : ta.parentNode.appendChild(counter);
-
-      function update() {
-        var len = ta.value.length;
-        counter.textContent = max
-          ? len + " / " + max + " characters"
-          : len + " characters";
-        if (max && len > max) {
-          counter.style.color = "#b91c1c";
-          counter.style.fontWeight = "700";
-        } else if (max && len > max * 0.9) {
-          counter.style.color = "#92400e";
-          counter.style.fontWeight = "600";
-        } else {
-          counter.style.color = "#6b7280";
-          counter.style.fontWeight = "400";
+        if (small && small.tagName === 'SMALL') {
+            var span = small.querySelector('span');
+            if (span) {
+                counter = span;
+            }
         }
-      }
 
-      ta.addEventListener("input", update);
-      update();
+        if (counter) {
+            counter.textContent = ta.value.length;
+            ta.addEventListener('input', function () {
+                counter.textContent = this.value.length;
+            });
+        }
     });
 
-  //Auto-dismiss flash messages after 6 s
-  document
-    .querySelectorAll(".flash-success, .flash-error, .flash-warning")
-    .forEach(function (el) {
-      setTimeout(function () {
-        el.style.transition = "opacity .4s";
-        el.style.opacity = "0";
+    // ── Auto-dismiss flashes after 6 seconds ─────────────────────
+    document.querySelectorAll('.flash-success').forEach(function (el) {
         setTimeout(function () {
-          el.remove();
-        }, 400);
-      }, 6000);
+            el.style.transition = 'opacity .4s';
+            el.style.opacity = '0';
+
+            setTimeout(function () {
+                el.remove();
+            }, 400);
+        }, 6000);
     });
 
-  //User profile dropdown
-  var trigger = document.getElementById("userProfileTrigger");
-  var menu = document.getElementById("userProfileMenu");
-  if (trigger && menu) {
-    trigger.addEventListener("click", function (e) {
-      e.stopPropagation();
-      var open = menu.classList.toggle("open");
-      trigger.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    document.addEventListener("click", function (e) {
-      if (!menu.contains(e.target) && !trigger.contains(e.target)) {
-        menu.classList.remove("open");
-        trigger.setAttribute("aria-expanded", "false");
-      }
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
-        menu.classList.remove("open");
-        trigger.setAttribute("aria-expanded", "false");
-      }
-    });
-  }
+    // ── User profile dropdown ────────────────────────────────────
+    var userProfileTrigger = document.getElementById('userProfileTrigger');
+    var userProfileMenu = document.getElementById('userProfileMenu');
 
-  //Logout confirmation
-  document.querySelectorAll(".js-logout-confirm").forEach(function (link) {
-    link.addEventListener("click", function (e) {
-      if (!window.confirm("Are you sure you want to logout?"))
-        e.preventDefault();
+    function closeUserProfileMenu() {
+        if (userProfileMenu && userProfileTrigger) {
+            userProfileMenu.classList.remove('open');
+            userProfileTrigger.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    if (userProfileTrigger && userProfileMenu) {
+        userProfileTrigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            var isOpen = userProfileMenu.classList.toggle('open');
+            userProfileTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!userProfileMenu.contains(e.target) && !userProfileTrigger.contains(e.target)) {
+                closeUserProfileMenu();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeUserProfileMenu();
+            }
+        });
+    }
+
+    // ── Logout confirmation ──────────────────────────────────────
+    document.querySelectorAll('.js-logout-confirm').forEach(function (logoutLink) {
+        logoutLink.addEventListener('click', function (e) {
+            var confirmed = window.confirm('Are you sure you want to logout?');
+
+            if (!confirmed) {
+                e.preventDefault();
+            }
+        });
     });
-  });
+
+    // ── Admin sidebar toggle ─────────────────────────────────────
+    var adminSidebarToggle = document.getElementById('adminSidebarToggle');
+    var adminSidebarClose = document.getElementById('adminSidebarClose');
+    var adminSidebarBackdrop = document.getElementById('adminSidebarBackdrop');
+    var adminSidebarStorageKey = 'eventhub_admin_sidebar_collapsed';
+
+    if (adminSidebarToggle) {
+        var adminIsMobile = function () {
+            return window.innerWidth <= 980;
+        };
+
+        var applyAdminSidebarState = function (collapsed) {
+            body.classList.toggle('sidebar-collapsed', collapsed);
+            adminSidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        };
+
+        var savedAdminSidebarState = localStorage.getItem(adminSidebarStorageKey);
+
+        if (savedAdminSidebarState === '1') {
+            applyAdminSidebarState(true);
+        } else if (savedAdminSidebarState === '0') {
+            applyAdminSidebarState(false);
+        } else {
+            applyAdminSidebarState(adminIsMobile());
+        }
+
+        adminSidebarToggle.addEventListener('click', function () {
+            var collapsed = !body.classList.contains('sidebar-collapsed');
+            applyAdminSidebarState(collapsed);
+            localStorage.setItem(adminSidebarStorageKey, collapsed ? '1' : '0');
+        });
+
+        if (adminSidebarClose) {
+            adminSidebarClose.addEventListener('click', function () {
+                applyAdminSidebarState(true);
+                localStorage.setItem(adminSidebarStorageKey, '1');
+            });
+        }
+
+        if (adminSidebarBackdrop) {
+            adminSidebarBackdrop.addEventListener('click', function () {
+                applyAdminSidebarState(true);
+                localStorage.setItem(adminSidebarStorageKey, '1');
+            });
+        }
+
+        window.addEventListener('resize', function () {
+            if (adminIsMobile() && !body.classList.contains('sidebar-collapsed')) {
+                adminSidebarToggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+
+    // ── User sidebar toggle ──────────────────────────────────────
+    var userSidebarToggle = document.getElementById('userSidebarToggle');
+    var userSidebarClose = document.getElementById('userSidebarClose');
+    var userSidebarBackdrop = document.getElementById('userSidebarBackdrop');
+    var userSidebarStorageKey = 'eventhub_user_sidebar_collapsed';
+
+    if (userSidebarToggle) {
+        var userIsMobile = function () {
+            return window.innerWidth <= 980;
+        };
+
+        var applyUserSidebarState = function (collapsed) {
+            body.classList.toggle('user-sidebar-collapsed', collapsed);
+            userSidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+
+            if (collapsed) {
+                closeUserProfileMenu();
+            }
+        };
+
+        var savedUserSidebarState = localStorage.getItem(userSidebarStorageKey);
+
+        if (savedUserSidebarState === '1') {
+            applyUserSidebarState(true);
+        } else if (savedUserSidebarState === '0') {
+            applyUserSidebarState(false);
+        } else {
+            applyUserSidebarState(false);
+        }
+
+        userSidebarToggle.addEventListener('click', function () {
+            var collapsed = !body.classList.contains('user-sidebar-collapsed');
+            applyUserSidebarState(collapsed);
+            localStorage.setItem(userSidebarStorageKey, collapsed ? '1' : '0');
+        });
+
+        if (userSidebarClose) {
+            userSidebarClose.addEventListener('click', function () {
+                applyUserSidebarState(true);
+                localStorage.setItem(userSidebarStorageKey, '1');
+            });
+        }
+
+        if (userSidebarBackdrop) {
+            userSidebarBackdrop.addEventListener('click', function () {
+                applyUserSidebarState(true);
+                localStorage.setItem(userSidebarStorageKey, '1');
+            });
+        }
+
+        window.addEventListener('resize', function () {
+            if (userIsMobile() && !body.classList.contains('user-sidebar-collapsed')) {
+                userSidebarToggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+});
+
+document.querySelectorAll('.password-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var input = btn.parentElement.querySelector('input');
+        var eyeOpen = btn.querySelector('.eye-open');
+        var eyeClosed = btn.querySelector('.eye-closed');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeOpen.style.display = 'none';
+            eyeClosed.style.display = 'inline-flex';
+            btn.setAttribute('aria-label', 'Hide password');
+            btn.setAttribute('title', 'Hide password');
+        } else {
+            input.type = 'password';
+            eyeOpen.style.display = 'inline-flex';
+            eyeClosed.style.display = 'none';
+            btn.setAttribute('aria-label', 'Show password');
+            btn.setAttribute('title', 'Show password');
+        }
+    });
 });
