@@ -1,40 +1,69 @@
-/* admin-core.css - Premium Admin UI */
+/* admin-core.css */
 
 :root {
   --admin-sidebar-bg: #030408;
   --admin-sidebar-border: rgba(255, 255, 255, 0.05);
-  --admin-sidebar-width: 280px;
   --admin-content-bg: #080b14;
+  --admin-sidebar-width: 320px;
+  --admin-sidebar-collapsed-width: 0px;
 }
 
 body.admin-body {
   margin: 0;
   padding: 0;
-  background: var(--admin-content-bg);
   min-height: 100vh;
-  display: flex;
+  background: var(--admin-content-bg);
+  color: #eef4ff;
 }
 
-/* Sidebar Styling */
+/* ===== Shell ===== */
+.admin-layout-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--admin-sidebar-width) minmax(0, 1fr);
+  transition: grid-template-columns 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+body.sidebar-collapsed .admin-layout-shell {
+  grid-template-columns: var(--admin-sidebar-collapsed-width) minmax(0, 1fr);
+}
+
+/* ===== Sidebar ===== */
 .admin-sidebar {
   width: var(--admin-sidebar-width);
+  min-width: var(--admin-sidebar-width);
   background: var(--admin-sidebar-bg);
   border-right: 1px solid var(--admin-sidebar-border);
-  position: fixed;
-  top: 0;
-  left: 0;
   height: 100vh;
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
-  z-index: 100;
-  backdrop-filter: blur(20px);
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  z-index: 40;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35);
+  transition:
+    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.24s ease,
+    width 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    min-width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.sidebar-collapsed .admin-sidebar {
+  width: 0;
+  min-width: 0;
+  border-right: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .admin-sidebar-header {
   padding: 30px 24px;
-  text-align: center;
   border-bottom: 1px solid var(--admin-sidebar-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .admin-brand {
@@ -45,6 +74,7 @@ body.admin-body {
   background-clip: text;
   color: transparent;
   display: block;
+  text-decoration: none;
 }
 
 .admin-sidebar-nav {
@@ -61,32 +91,23 @@ body.admin-body {
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  border-radius: 12px;
+  border-radius: 14px;
   color: var(--text-soft);
   font-size: 0.95rem;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  transition: all 0.28s ease;
   position: relative;
   overflow: hidden;
-}
-
-.admin-nav-item i {
-  font-size: 1.2rem;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
 }
 
 .admin-nav-item::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), transparent);
   opacity: 0;
-  z-index: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.28s ease;
 }
 
 .admin-nav-item > span {
@@ -107,7 +128,13 @@ body.admin-body {
 
 .admin-nav-item.active {
   border-left: 3px solid var(--primary);
-  border-radius: 4px 12px 12px 4px;
+  border-radius: 4px 14px 14px 4px;
+}
+
+.admin-sidebar-divider {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
 }
 
 .admin-sidebar-footer {
@@ -138,11 +165,12 @@ body.admin-body {
   display: block;
   text-align: center;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(251, 113, 133, 0.1);
   color: #fb7185;
   font-size: 0.85rem;
   font-weight: 700;
+  text-decoration: none;
   transition: all 0.2s ease;
 }
 
@@ -152,14 +180,115 @@ body.admin-body {
   box-shadow: 0 4px 15px rgba(251, 113, 133, 0.3);
 }
 
-/* Main Content Area */
+/* ===== Main ===== */
 .admin-main {
-  flex: 1;
-  margin-left: var(--admin-sidebar-width);
-  padding: 40px 48px;
   min-width: 0;
+  width: 100%;
+  padding: 32px 36px;
+  transition:
+    padding 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+body.sidebar-collapsed .admin-main {
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+.admin-main-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.admin-main-topbar-title {
+  color: #8da0bf;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: none;
+}
+
+/* ===== Toggle buttons ===== */
+.admin-sidebar-toggle,
+.admin-sidebar-close {
+  border: 1px solid rgba(126, 159, 214, 0.16);
+  background: #152742;
+  color: #eef4ff;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-sidebar-toggle:hover,
+.admin-sidebar-close:hover {
+  background: #203557;
+  transform: translateY(-1px);
+}
+
+.admin-sidebar-close {
+  margin-left: auto;
+  display: none;
+}
+
+body.sidebar-collapsed .admin-sidebar-toggle {
+  background: #1d3153;
+}
+
+/* ===== Flash ===== */
+.admin-flash-stack {
+  margin-bottom: 24px;
+  max-width: 100%;
+}
+
+/* ===== Backdrop ===== */
+.admin-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 8, 20, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+  z-index: 30;
+}
+
+/* ===== Make page content actually expand ===== */
+.container,
+.container.section,
+.container.admin-dashboard-page,
+.container.admin-users-page,
+.container.admin-events-page,
+.container.admin-bookings-page {
+  width: 100%;
+  max-width: 100%;
+  transition: max-width 0.34s cubic-bezier(0.22, 1, 0.36, 1), width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.sidebar-collapsed .container,
+body.sidebar-collapsed .container.section,
+body.sidebar-collapsed .container.admin-dashboard-page,
+body.sidebar-collapsed .container.admin-users-page,
+body.sidebar-collapsed .container.admin-events-page,
+body.sidebar-collapsed .container.admin-bookings-page {
+  max-width: 100% !important;
+  width: 100%;
+}
+
+/* ===== Helpful grid expansion ===== */
+body.sidebar-collapsed .users-cards,
+body.sidebar-collapsed .events-cards,
+body.sidebar-collapsed .dashboard-stats-grid,
+body.sidebar-collapsed .admin-stats-grid {
+  width: 100%;
+}
+
+/* ===== Optional page title helpers ===== */
 .admin-topbar {
   display: flex;
   justify-content: space-between;
@@ -183,16 +312,47 @@ body.admin-body {
   font-size: 0.95rem;
 }
 
-@media (max-width: 900px) {
+/* ===== Mobile ===== */
+@media (max-width: 980px) {
+  .admin-layout-shell {
+    display: block;
+  }
+
   .admin-sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  .admin-sidebar.open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    min-width: 300px;
+    max-width: 84vw;
+    height: 100vh;
     transform: translateX(0);
+    opacity: 1;
   }
+
+  .admin-sidebar-close {
+    display: inline-flex;
+  }
+
   .admin-main {
-    margin-left: 0;
-    padding: 24px;
+    width: 100%;
+    padding: 24px 20px;
+  }
+
+  body.sidebar-collapsed .admin-sidebar {
+    width: 300px;
+    min-width: 300px;
+    transform: translateX(-100%);
+    opacity: 1;
+    pointer-events: none;
+  }
+
+  body:not(.sidebar-collapsed) .admin-sidebar-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .admin-main-topbar-title {
+    display: block;
   }
 }
