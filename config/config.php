@@ -26,23 +26,23 @@ const MAIL_ENCRYPTION = 'tls';   // tls | ssl | ''
 // ── Uploads ───────────────────────────────────────────────────────────────────
 const UPLOAD_BANNER_DIR     = __DIR__ . '/../uploads/banners/';
 const UPLOAD_BANNER_URL     = APP_URL . '/uploads/banners/';
-const UPLOAD_MAX_SIZE_BYTES = 5 * 1024 * 1024;  // 5 MB
+const UPLOAD_MAX_SIZE_BYTES = 5 * 1024 * 1024;  // 5 MB (FR-EC-05)
 const UPLOAD_ALLOWED_TYPES  = ['image/jpeg', 'image/png'];
 
 // ── Session ───────────────────────────────────────────────────────────────────
 const SESSION_NAME          = 'eventhub_session';
-const SESSION_TIMEOUT       = 1800;   // 30 minutes idle
+const SESSION_TIMEOUT       = 1800;   // 30 minutes idle (FR-UM-11)
 const ITEMS_PER_PAGE        = 9;
-const MAX_SEATS_PER_BOOKING = 10;
+const MAX_SEATS_PER_BOOKING = 10;    // FR-BP-01
 
 // ── Paths ────────────────────────────────────────────────────────────────────
-define('LOG_FILE', dirname(__DIR__) . '/logs/app.log');
-define('MAIL_LOG', dirname(__DIR__) . '/logs/mail.log');
+define('LOG_FILE',    dirname(__DIR__) . '/logs/app.log');
+define('MAIL_LOG',    dirname(__DIR__) . '/logs/mail.log');
 
 // ── Bootstrap session ─────────────────────────────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_name(SESSION_NAME);
-    session_set_cookie_params([git
+    session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
         'domain'   => '',
