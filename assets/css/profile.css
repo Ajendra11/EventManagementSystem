@@ -1,308 +1,860 @@
-/* =====================================
-   auth/profile.php only
-   compact professional settings page
-   ===================================== */
+@import url("./base-core.css");
 
-body.page-auth-profile-php {
-  background: #f5f6f8;
-  color: #111827;
+/* =========================
+   PROFILE MAIN PAGE
+   ========================= */
+
+.pm-shell {
+  max-width: 980px;
+  margin: 0 auto;
 }
 
-body.page-auth-profile-php::before {
-  display: none;
+.pm-card {
+  overflow: hidden;
+  padding: 0;
+  border-radius: 30px;
+  box-shadow: var(--shadow-lg);
 }
 
-body.page-auth-profile-php .site-header {
-  background: rgba(255, 255, 255, 0.96);
-  border-bottom: 1px solid #e7ebf0;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+.pm-hero {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
-body.page-auth-profile-php .site-footer {
-  background: transparent;
-  border-top: 0;
+.pm-hero-media {
+  position: absolute;
+  inset: 0;
 }
 
-body.page-auth-profile-php .settings-shell {
-  max-width: 960px;
-  margin: 1.35rem auto 2rem;
-  padding: 0 0.85rem;
-  display: grid;
-  grid-template-columns: 420px minmax(0, 1fr);
-  gap: 1rem;
-  align-items: start;
+.pm-hero-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(1.05) contrast(1.04) brightness(.72);
 }
 
-body.page-auth-profile-php .settings-menu-column,
-body.page-auth-profile-php .settings-detail-stack {
-  min-width: 0;
+.pm-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5,10,22,.18) 0%, rgba(6,10,20,.62) 56%, rgba(7,10,19,.94) 100%),
+    radial-gradient(circle at 20% 20%, rgba(139,92,246,.28), transparent 30%),
+    radial-gradient(circle at 80% 22%, rgba(34,211,238,.16), transparent 24%);
 }
 
-body.page-auth-profile-php .settings-profile-card,
-body.page-auth-profile-php .settings-card,
-body.page-auth-profile-php .settings-form-panel {
-  background: #ffffff;
-  border: 1px solid #e9edf3;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
-}
-
-body.page-auth-profile-php .settings-profile-card {
+.pm-hero-content {
+  position: relative;
+  z-index: 2;
+  min-height: 360px;
+  padding: 34px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 1rem 0.9rem 0.85rem;
-  margin-bottom: 0.7rem;
+  align-items: flex-end;
+  gap: 24px;
 }
 
-body.page-auth-profile-php .settings-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f43f8f, #ec4899);
-  color: #ffffff;
+.pm-avatar {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 104px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 20px 40px rgba(139,92,246,.30),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+.pm-user-meta {
+  max-width: 700px;
+}
+
+.pm-user-meta h1 {
+  margin: 12px 0 8px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.04;
+  letter-spacing: -.04em;
+  color: #fff;
+}
+
+.pm-subtitle {
+  margin: 0;
+  color: rgba(255,255,255,.82);
+  font-size: 1rem;
+  max-width: 58ch;
+}
+
+.pm-user-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.pm-chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.45rem;
-  font-weight: 700;
-  margin-bottom: 0.55rem;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.10);
+  color: #eef2ff;
+  font-size: .92rem;
+  backdrop-filter: blur(10px);
 }
 
-body.page-auth-profile-php .settings-profile-name {
+.pm-body {
+  padding: 30px;
+}
+
+.pm-section-head {
+  margin-bottom: 20px;
+}
+
+.pm-section-head h2 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  letter-spacing: -.03em;
+  color: #fff;
+}
+
+.pm-section-head p {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: #111827;
+  color: var(--text-soft);
 }
 
-body.page-auth-profile-php .settings-profile-email {
-  margin: 0.2rem 0 0;
-  font-size: 0.82rem;
-  line-height: 1.35;
-  color: #6b7280;
-  word-break: break-word;
+.pm-menu {
+  display: grid;
+  gap: 14px;
 }
 
-body.page-auth-profile-php .settings-group {
-  margin-bottom: 0.7rem;
-}
-
-body.page-auth-profile-php .settings-group-title {
-  margin: 0 0 0.35rem 0.3rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #9ca3af;
-}
-
-body.page-auth-profile-php .settings-card {
+.pm-menu-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.11);
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
   overflow: hidden;
 }
 
-body.page-auth-profile-php .settings-row {
+.pm-menu-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(139,92,246,.14), transparent 28%),
+    linear-gradient(90deg, rgba(255,255,255,.03), transparent 55%);
+  opacity: 0;
+  transition: opacity .22s ease;
+  pointer-events: none;
+}
+
+.pm-menu-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,.18);
+  box-shadow: 0 18px 30px rgba(0,0,0,.22);
+}
+
+.pm-menu-item:hover::before {
+  opacity: 1;
+}
+
+.pm-menu-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(139,92,246,.12);
+  border: 1px solid rgba(139,92,246,.22);
+  color: #e9dbff;
+}
+
+.pm-menu-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.pm-menu-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pm-menu-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.pm-menu-desc {
+  font-size: .92rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.pm-menu-arrow {
+  font-size: 2rem;
+  line-height: 1;
+  color: rgba(255,255,255,.72);
+  transition: transform .22s ease, color .22s ease;
+}
+
+.pm-menu-item:hover .pm-menu-arrow {
+  transform: translateX(4px);
+  color: #fff;
+}
+
+.pm-menu-item.danger .pm-menu-icon {
+  background: rgba(251,113,133,.12);
+  border-color: rgba(251,113,133,.22);
+  color: #ffd2da;
+}
+
+.pm-menu-item.logout .pm-menu-icon {
+  background: rgba(96,165,250,.12);
+  border-color: rgba(96,165,250,.22);
+  color: #d7e7ff;
+}
+
+/* =========================
+   INNER SETTINGS PAGES
+   manage-profile.php
+   password-security.php
+   delete-account.php
+   ========================= */
+
+.page-auth-manage-profile-php .section,
+.page-auth-password-security-php .section,
+.page-auth-delete-account-php .section {
+  position: relative;
+  padding-top: 42px;
+  padding-bottom: 56px;
+}
+
+.page-auth-manage-profile-php .section::before,
+.page-auth-password-security-php .section::before,
+.page-auth-delete-account-php .section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(139,92,246,.16), transparent 30%),
+    radial-gradient(circle at 90% 14%, rgba(34,211,238,.10), transparent 26%);
+}
+
+.page-auth-manage-profile-php .container,
+.page-auth-password-security-php .container,
+.page-auth-delete-account-php .container {
+  position: relative;
+  z-index: 1;
+}
+
+.page-auth-manage-profile-php .panel,
+.page-auth-password-security-php .panel,
+.page-auth-delete-account-php .panel {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 36px;
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, rgba(6,12,28,.94), rgba(4,10,24,.92));
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 28px 60px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.04);
+  overflow: hidden;
+  position: relative;
+}
+
+.page-auth-manage-profile-php .panel::before,
+.page-auth-password-security-php .panel::before,
+.page-auth-delete-account-php .panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top right, rgba(139,92,246,.12), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(34,211,238,.08), transparent 24%);
+}
+
+.page-auth-manage-profile-php .panel > *,
+.page-auth-password-security-php .panel > *,
+.page-auth-delete-account-php .panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* headings */
+.page-auth-manage-profile-php h1,
+.page-auth-manage-profile-php h2,
+.page-auth-password-security-php h1,
+.page-auth-password-security-php h2,
+.page-auth-delete-account-php h1,
+.page-auth-delete-account-php h2 {
+  margin: 0 0 10px;
+  color: #fff;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -.04em;
+}
+
+.page-auth-manage-profile-php p,
+.page-auth-password-security-php p,
+.page-auth-delete-account-php p {
+  color: rgba(255,255,255,.76);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* back link */
+.page-auth-manage-profile-php a[href*="profile.php"]:not(.btn):not(.button),
+.page-auth-password-security-php a[href*="profile.php"]:not(.btn):not(.button),
+.page-auth-delete-account-php a[href*="profile.php"]:not(.btn):not(.button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 12px 22px rgba(0,0,0,.16);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+
+.page-auth-manage-profile-php a[href*="profile.php"]:not(.btn):not(.button):hover,
+.page-auth-password-security-php a[href*="profile.php"]:not(.btn):not(.button):hover,
+.page-auth-delete-account-php a[href*="profile.php"]:not(.btn):not(.button):hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.09);
+}
+
+/* labels */
+.page-auth-manage-profile-php label,
+.page-auth-password-security-php label,
+.page-auth-delete-account-php label {
+  display: block;
+  margin-bottom: 10px;
+  color: #f3f4f6;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+/* inputs */
+.page-auth-manage-profile-php input[type="text"],
+.page-auth-manage-profile-php input[type="email"],
+.page-auth-manage-profile-php input[type="password"],
+.page-auth-manage-profile-php textarea,
+.page-auth-password-security-php input[type="text"],
+.page-auth-password-security-php input[type="email"],
+.page-auth-password-security-php input[type="password"],
+.page-auth-password-security-php textarea,
+.page-auth-delete-account-php input[type="text"],
+.page-auth-delete-account-php input[type="email"],
+.page-auth-delete-account-php input[type="password"],
+.page-auth-delete-account-php textarea {
+  width: 100%;
+  min-height: 58px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(3,8,22,.88);
+  color: #fff;
+  font-size: 1.04rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.03),
+    0 10px 24px rgba(0,0,0,.14);
+  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease, transform .22s ease;
+  appearance: none;
+}
+
+.page-auth-manage-profile-php textarea,
+.page-auth-password-security-php textarea,
+.page-auth-delete-account-php textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.page-auth-manage-profile-php input::placeholder,
+.page-auth-manage-profile-php textarea::placeholder,
+.page-auth-password-security-php input::placeholder,
+.page-auth-password-security-php textarea::placeholder,
+.page-auth-delete-account-php input::placeholder,
+.page-auth-delete-account-php textarea::placeholder {
+  color: rgba(255,255,255,.34);
+}
+
+.page-auth-manage-profile-php input:focus,
+.page-auth-manage-profile-php textarea:focus,
+.page-auth-password-security-php input:focus,
+.page-auth-password-security-php textarea:focus,
+.page-auth-delete-account-php input:focus,
+.page-auth-delete-account-php textarea:focus {
+  outline: none;
+  border-color: rgba(139,92,246,.62);
+  background: rgba(6,12,28,.96);
+  box-shadow:
+    0 0 0 4px rgba(139,92,246,.16),
+    0 16px 30px rgba(0,0,0,.18);
+  transform: translateY(-1px);
+}
+
+/* form spacing */
+.page-auth-manage-profile-php form,
+.page-auth-password-security-php form,
+.page-auth-delete-account-php form {
+  margin-top: 24px;
+}
+
+.page-auth-manage-profile-php form > * + *,
+.page-auth-password-security-php form > * + *,
+.page-auth-delete-account-php form > * + * {
+  margin-top: 18px;
+}
+
+/* buttons */
+.page-auth-manage-profile-php button,
+.page-auth-manage-profile-php input[type="submit"],
+.page-auth-password-security-php button,
+.page-auth-password-security-php input[type="submit"],
+.page-auth-delete-account-php button,
+.page-auth-delete-account-php input[type="submit"] {
+  appearance: none;
+  border: 0;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  box-shadow:
+    0 18px 30px rgba(139,92,246,.24),
+    inset 0 1px 0 rgba(255,255,255,.18);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.page-auth-manage-profile-php button:hover,
+.page-auth-manage-profile-php input[type="submit"]:hover,
+.page-auth-password-security-php button:hover,
+.page-auth-password-security-php input[type="submit"]:hover,
+.page-auth-delete-account-php button:hover,
+.page-auth-delete-account-php input[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 34px rgba(139,92,246,.30),
+    inset 0 1px 0 rgba(255,255,255,.18);
+  filter: brightness(1.03);
+}
+
+/* danger button support */
+.page-auth-delete-account-php button,
+.page-auth-delete-account-php input[type="submit"] {
+  background: linear-gradient(135deg, #fb7185, #ef4444);
+  box-shadow:
+    0 18px 30px rgba(239,68,68,.24),
+    inset 0 1px 0 rgba(255,255,255,.16);
+}
+
+/* alerts / notes */
+.page-auth-manage-profile-php .flash,
+.page-auth-password-security-php .flash,
+.page-auth-delete-account-php .flash {
+  margin-bottom: 18px;
+  border-radius: 16px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 768px) {
+  .pm-hero {
+    min-height: auto;
+  }
+
+  .pm-hero-content {
+    min-height: auto;
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+
+  .pm-avatar {
+    width: 82px;
+    height: 82px;
+    font-size: 2rem;
+    border-radius: 22px;
+  }
+
+  .pm-body {
+    padding: 22px;
+  }
+
+  .pm-menu-item {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .pm-menu-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .pm-menu-desc {
+    font-size: .88rem;
+  }
+
+  .page-auth-manage-profile-php .panel,
+  .page-auth-password-security-php .panel,
+  .page-auth-delete-account-php .panel {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .page-auth-manage-profile-php h1,
+  .page-auth-manage-profile-php h2,
+  .page-auth-password-security-php h1,
+  .page-auth-password-security-php h2,
+  .page-auth-delete-account-php h1,
+  .page-auth-delete-account-php h2 {
+    font-size: clamp(1.8rem, 7vw, 2.4rem);
+  }
+}
+
+@media (max-width: 520px) {
+  .pm-user-meta h1 {
+    font-size: 1.8rem;
+  }
+
+  .pm-menu-item {
+    grid-template-columns: 1fr;
+  }
+
+  .pm-menu-arrow {
+    display: none;
+  }
+
+  .pm-menu-icon {
+    margin-bottom: 2px;
+  }
+
+  .page-auth-manage-profile-php a[href*="profile.php"]:not(.btn):not(.button),
+  .page-auth-password-security-php a[href*="profile.php"]:not(.btn):not(.button),
+  .page-auth-delete-account-php a[href*="profile.php"]:not(.btn):not(.button),
+  .page-auth-manage-profile-php button,
+  .page-auth-manage-profile-php input[type="submit"],
+  .page-auth-password-security-php button,
+  .page-auth-password-security-php input[type="submit"],
+  .page-auth-delete-account-php button,
+  .page-auth-delete-account-php input[type="submit"] {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* =========================================================
+   COMPACT SETTINGS PAGES
+   Used for:
+   - manage-profile.php
+   - password-security.php
+   - delete-account.php
+========================================================= */
+
+.pm-settings-shell {
+  max-width: 760px;
+  margin: 0;
+}
+
+.pm-inline-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.88);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.pm-inline-back:hover {
+  opacity: 1;
+  transform: translateX(-1px);
+}
+
+.pm-settings-card {
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(16,22,40,.82), rgba(10,15,28,.92));
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow: 0 18px 50px rgba(0,0,0,.22);
+}
+
+.pm-settings-head {
+  margin-bottom: 22px;
+}
+
+.pm-settings-title {
+  margin: 0 0 8px;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1.1;
+  color: #f8fafc;
+}
+
+.pm-settings-subtitle {
+  margin: 0;
+  max-width: 560px;
+  color: rgba(226,232,240,.84);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.pm-settings-errors {
+  margin-bottom: 16px;
+}
+
+.pm-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pm-settings-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.pm-settings-field input,
+.pm-settings-field textarea,
+.pm-settings-field select {
+  width: 100%;
+}
+
+.pm-settings-help {
+  margin: 10px 0 0;
+  font-size: 0.94rem;
+  color: rgba(203,213,225,.76);
+}
+
+.pm-settings-actions {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  min-height: 44px;
-  padding: 0.72rem 0.85rem;
-  border-bottom: 1px solid #f1f3f6;
-  color: #111827;
-  text-decoration: none;
-  transition: background 0.15s ease;
+  justify-content: flex-start;
+  padding-top: 4px;
 }
 
-body.page-auth-profile-php .settings-row:last-child {
-  border-bottom: none;
+.pm-settings-actions .btn {
+  min-width: 160px;
 }
 
-body.page-auth-profile-php .settings-row:hover {
-  background: #fafbfc;
-}
-
-body.page-auth-profile-php .settings-row:focus-visible {
-  outline: 2px solid rgba(236, 72, 153, 0.18);
-  outline-offset: -2px;
-}
-
-body.page-auth-profile-php .settings-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background: #f3f4f6;
-  color: #4b5563;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-body.page-auth-profile-php .settings-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-body.page-auth-profile-php .settings-row-copy {
-  font-size: 0.89rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #111827;
-}
-
-body.page-auth-profile-php .settings-row-end {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-body.page-auth-profile-php .settings-value {
-  font-size: 0.77rem;
-  color: #6b7280;
-}
-
-body.page-auth-profile-php .settings-value-badge {
-  min-width: 18px;
-  height: 18px;
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background: #ec4899;
-  color: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-body.page-auth-profile-php .settings-chevron {
-  font-size: 1rem;
-  line-height: 1;
-  color: #9ca3af;
-}
-
-body.page-auth-profile-php .settings-row-danger .settings-row-copy,
-body.page-auth-profile-php .settings-row-danger .settings-icon {
-  color: #dc2626;
-}
-
-body.page-auth-profile-php .settings-row-danger .settings-icon {
-  background: #fef2f2;
-}
-
-body.page-auth-profile-php .settings-row-danger:hover {
-  background: #fff7f7;
-}
-
-body.page-auth-profile-php .settings-detail-stack {
-  display: grid;
-  gap: 0.85rem;
-}
-
-body.page-auth-profile-php .settings-form-panel {
-  padding: 0.95rem;
-}
-
-body.page-auth-profile-php .settings-form-head {
-  margin-bottom: 0.8rem;
-}
-
-body.page-auth-profile-php .settings-form-head h2 {
-  margin: 0 0 0.22rem;
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-body.page-auth-profile-php .settings-form-head p,
-body.page-auth-profile-php .settings-helper {
-  margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.45;
-  color: #6b7280;
-}
-
-body.page-auth-profile-php .form-group {
-  margin-bottom: 0.8rem;
-}
-
-body.page-auth-profile-php label {
-  display: block;
-  margin: 0 0 0.3rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-body.page-auth-profile-php input,
-body.page-auth-profile-php select,
-body.page-auth-profile-php textarea {
-  width: 100%;
-  padding: 0.72rem 0.8rem;
-  border: 1px solid #dbe2ea;
-  border-radius: 10px;
-  background: #ffffff;
-  color: #111827;
-  font-size: 0.86rem;
-  box-shadow: none;
-}
-
-body.page-auth-profile-php input:focus,
-body.page-auth-profile-php select:focus,
-body.page-auth-profile-php textarea:focus {
-  outline: none;
-  border-color: #ec4899;
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
-}
-
-body.page-auth-profile-php .btn,
-body.page-auth-profile-php button {
-  border-radius: 10px;
-}
-
-body.page-auth-profile-php .btn-primary {
-  box-shadow: none;
-}
-
-body.page-auth-profile-php .settings-danger-panel {
-  border-color: #fecaca;
-}
-
-body.page-auth-profile-php .flash,
-body.page-auth-profile-php .alert {
-  border-radius: 10px;
-  font-size: 0.82rem;
-}
-
-@media (max-width: 900px) {
-  body.page-auth-profile-php .settings-shell {
-    grid-template-columns: 1fr;
-    max-width: 520px;
+/* Small refinement for settings pages on smaller screens */
+@media (max-width: 768px) {
+  .pm-settings-shell {
+    max-width: 100%;
   }
+
+  .pm-settings-card {
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .pm-settings-title {
+    font-size: 2rem;
+  }
+}
+
+/* =========================================================
+   PASSWORD & SECURITY
+========================================================= */
+
+.pm-password-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pm-password-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-toggle-pass {
+  flex-shrink: 0;
+  min-width: 82px;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  color: #e5e7eb;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+
+.pm-toggle-pass:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.16);
 }
 
 @media (max-width: 640px) {
-  body.page-auth-profile-php .settings-shell {
-    margin: 1rem auto 1.5rem;
-    padding: 0 0.7rem;
+  .pm-password-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  body.page-auth-profile-php .settings-profile-card,
-  body.page-auth-profile-php .settings-form-panel {
-    padding: 0.9rem;
+  .pm-toggle-pass {
+    width: 100%;
   }
+}
+/* =========================================================
+   DELETE ACCOUNT
+========================================================= */
 
-  body.page-auth-profile-php .settings-row {
-    min-height: 42px;
-    padding: 0.68rem 0.8rem;
-  }
+.pm-danger-card {
+  border-color: rgba(239, 68, 68, 0.16);
+}
 
-  body.page-auth-profile-php .settings-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 1.35rem;
-  }
+.pm-danger-note {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.14);
+}
+
+.pm-danger-note h3 {
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+  color: #fecaca;
+}
+
+.pm-danger-note ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(254, 226, 226, 0.88);
+}
+
+.pm-danger-note li {
+  margin-bottom: 6px;
+  font-size: 0.93rem;
+}
+
+.pm-danger-note li:last-child {
+  margin-bottom: 0;
+}
+/* =========================================================
+   DELETE ACCOUNT - BALANCED SIZE
+========================================================= */
+
+.pm-settings-shell {
+  padding-top: 10px;
+}
+
+.pm-settings-shell-narrow {
+  max-width: 760px;
+}
+
+.pm-settings-shell-narrow .pm-settings-card {
+  padding: 26px;
+}
+
+.pm-settings-shell-narrow .pm-settings-head {
+  margin-bottom: 18px;
+}
+
+.pm-settings-shell-narrow .pm-settings-title {
+  font-size: clamp(2.2rem, 3.5vw, 2.9rem);
+  margin-bottom: 8px;
+}
+
+.pm-settings-shell-narrow .pm-settings-subtitle {
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 580px;
+}
+
+.pm-danger-note {
+  margin-bottom: 18px;
+  padding: 16px 18px;
+  border-radius: 16px;
+}
+
+.pm-danger-note h3 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.pm-danger-note li {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.pm-settings-form {
+  gap: 18px;
+}
+
+.pm-settings-field label {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.pm-settings-help {
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
+
+.pm-settings-actions {
+  padding-top: 4px;
+}
+
+.pm-settings-actions .btn {
+  min-width: 170px;
+  padding: 0.82rem 1.1rem;
+}
+
+/* ===== Fix layout for profile pages ===== */
+
+.container.section {
+  width: min(900px, 100%);
+  margin: 0;
+}
+
+.has-user-sidebar .container.section {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* push content nicely from sidebar */
+.user-shell-main .container.section {
+  margin-left: 10px;
 }
