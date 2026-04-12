@@ -46,7 +46,6 @@ body {
   display: flex;
   align-items: flex-end;
   padding: 24px;
-
   background:
     linear-gradient(rgba(10, 15, 31, 0.25), rgba(10, 15, 31, 0.45)),
     url("./images/event.png") center/cover no-repeat;
@@ -71,12 +70,12 @@ body {
 
 /* badge */
 .auth-login-badge {
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.14);
-  font-size: 11px;
+  display: inline-flex;
+  width: fit-content;
   margin-bottom: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.10);
 }
 
 /* heading (SMALLER) */
@@ -190,7 +189,6 @@ body {
   border: none;
   font-weight: 700;
   cursor: pointer;
-
   background: linear-gradient(135deg, #7c5cff, #b06cff);
   box-shadow: 0 8px 20px rgba(124,92,255,0.25);
 }
@@ -249,4 +247,38 @@ body {
   .auth-login-visual {
     min-height: 200px;
   }
+}
+.password-field {
+  position: relative;
+}
+
+
+
+.password-field input {
+  width: 100%;
+  padding-right: 46px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  color: #cfd8ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
