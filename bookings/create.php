@@ -23,7 +23,7 @@ if (isset($result['error'])) {
 
 $bookingId = (int)$result['booking_id'];
 
-// FR-BP-10: Confirm free-event bookings immediately
+//Confirm free-event bookings immediately
 confirm_booking($bookingId);
 flash('success', 'Your booking is confirmed! You can view it in My Bookings.');
 redirect('bookings/my-bookings.php');
