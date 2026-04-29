@@ -17,6 +17,120 @@ function khalti_authorization_header(): string
     return 'Authorization: Key ' . $secret;
 }
 
+
+/** Make a JSON Khalti ePayment API request. */
+function khalti_api_request(string $endpoint, array $payload, int $maxAttempts = 3): array
+{
+    if (khalti_is_mock_mode()) {
+        return [
+            'ok' => false,
+            'mock' => true,
+            'status' => 0,
+            'message' => 'Khalti mock mode is enabled.',
+        ];
+    }
+
+    if (trim((string) KHALTI_SECRET_KEY) === '') {
+        return [
+            'ok' => false,
+            'status' => 0,
+            'message' => 'KHALTI_SECRET_KEY is required when KHALTI_MODE is not mock.',
+        ];
+    }
+
+    if (!function_exists('curl_init')) {
+        return [
+            'ok' => false,
+            'status' => 0,
+            'message' => 'PHP cURL extension is not enabled.',
+        ];
+    }
+
+    $url = rtrim((string) KHALTI_BASE_URL, '/') . '/' . ltrim($endpoint, '/');
+    $lastError = 'Unknown Khalti error.';
+    $lastStatus = 0;
+    $lastDecoded = null;
+    $lastRaw = '';
+
+    for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 20,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                khalti_authorization_header(),
+                'Content-Type: application/json',
+            ],
+        ]);
+
+        $raw = curl_exec($ch);
+        $errno = curl_errno($ch);
+        $error = curl_error($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        curl_close($ch);
+
+        $lastStatus = $status;
+        $lastRaw = (string) $raw;
+        $decoded = json_decode((string) $raw, true);
+        $lastDecoded = is_array($decoded) ? $decoded : null;
+
+        if ($errno) {
+            $lastError = $error;
+        } elseif ($status >= 200 && $status < 300 && is_array($decoded)) {
+            return [
+                'ok' => true,
+                'data' => $decoded,
+                'status' => $status,
+                'raw' => $lastRaw,
+            ];
+        } else {
+            $lastError = is_array($decoded)
+                ? json_encode($decoded, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+                : (string) $raw;
+        }
+
+        if ($status >= 400 && $status < 500) {
+            break;
+        }
+
+        usleep((int) (150000 * (2 ** ($attempt - 1))));
+    }
+
+    return [
+        'ok' => false,
+        'status' => $lastStatus,
+        'message' => $lastError,
+        'payload' => $lastDecoded ?? ['raw' => $lastRaw],
+    ];
+}
+
+function build_khalti_payment_payload(array $booking): array
+{
+    $bookingId = (int) $booking['id'];
+    $amount = (float) $booking['amount'];
+
+    return [
+        'return_url' => APP_URL . '/payments/callback.php',
+        'website_url' => APP_URL . '/',
+        // Khalti expects amount in paisa.
+        'amount' => (int) round($amount * 100),
+        'purchase_order_id' => (string) $bookingId,
+        'purchase_order_name' => 'EventHub booking #' . $bookingId . ' - ' . (string) ($booking['event_title'] ?? 'Event ticket'),
+        'customer_info' => [
+            'name' => (string) ($booking['full_name'] ?? 'EventHub Participant'),
+            'email' => (string) ($booking['email'] ?? ''),
+        ],
+    ];
+}
+
 /** Initiate Khalti payment for a pending paid booking. */
 function initiate_khalti_payment(array $booking): array
 {
@@ -78,6 +192,54 @@ function initiate_khalti_payment(array $booking): array
     return [
         'ok' => false,
         'message' => khalti_friendly_error($response, 'Payment initiation failed. Please check Khalti configuration.'),
+        'payload' => $response,
+    ];
+}
+
+/** Verify payment status by Khalti PIDX. */
+function verify_khalti_payment(string $pidx): array
+{
+    $pidx = trim($pidx);
+
+    if ($pidx === '') {
+        return ['ok' => false, 'status' => 'MissingPIDX', 'payload' => []];
+    }
+
+    if (khalti_is_mock_mode()) {
+        if (!str_starts_with($pidx, 'mock_')) {
+            return ['ok' => false, 'status' => 'InvalidMockPIDX', 'payload' => ['pidx' => $pidx]];
+        }
+
+        return [
+            'ok' => true,
+            'status' => 'Completed',
+            'transaction_id' => 'MOCK-' . strtoupper(substr(hash('sha256', $pidx), 0, 12)),
+            'payload' => [
+                'pidx' => $pidx,
+                'status' => 'Completed',
+                'mode' => 'mock',
+            ],
+        ];
+    }
+
+    $response = khalti_api_request('/epayment/lookup/', ['pidx' => $pidx]);
+
+    if (($response['ok'] ?? false)) {
+        $data = $response['data'];
+        $status = (string) ($data['status'] ?? '');
+        $transactionId = (string) ($data['transaction_id'] ?? ($data['idx'] ?? $pidx));
+
+        return [
+            'ok' => $status === 'Completed',
+            'status' => $status !== '' ? $status : 'Unknown',
+            'transaction_id' => $transactionId,
+            'payload' => $data,
+        ];
+    }
+
+    return [
+        'ok' => false,
+        'status' => 'LookupFailed',
         'payload' => $response,
     ];
 }
