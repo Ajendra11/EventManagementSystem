@@ -243,3 +243,48 @@ function verify_khalti_payment(string $pidx): array
         'payload' => $response,
     ];
 }
+
+/** Verify Khalti return/lookup metadata against the booking. */
+function khalti_validate_booking_payment(array $booking, array $returnPayload, array $lookupPayload): array
+{
+    if (!empty($returnPayload['purchase_order_id']) && (string) $returnPayload['purchase_order_id'] !== (string) $booking['id']) {
+        return ['Khalti purchase order does not match this booking.'];
+    }
+
+    foreach (['amount', 'total_amount'] as $amountKey) {
+        if (isset($lookupPayload[$amountKey]) && is_numeric($lookupPayload[$amountKey])) {
+            $expected = (int) round((float) $booking['amount'] * 100);
+            $actual = (int) $lookupPayload[$amountKey];
+            if ($actual !== $expected) {
+                return ['Khalti amount does not match the booking amount.'];
+            }
+        }
+    }
+
+    return [];
+}
+
+/** Translate common Khalti/API errors into user-friendly text. */
+function khalti_friendly_error(array $response, string $default): string
+{
+    $status = (int) ($response['status'] ?? 0);
+    $message = (string) ($response['message'] ?? '');
+
+    if ($status === 401 || str_contains(strtolower($message), 'unauthorized')) {
+        return 'Khalti authentication failed. Please check KHALTI_SECRET_KEY in .env.';
+    }
+
+    if ($status === 400) {
+        return 'Khalti rejected the payment request. Please check amount, return URL, and Khalti merchant settings.';
+    }
+
+    if ($status === 0 && trim((string) KHALTI_SECRET_KEY) === '' && !khalti_is_mock_mode()) {
+        return 'KHALTI_SECRET_KEY is required when KHALTI_MODE is not mock.';
+    }
+
+    if ($status === 0 && str_contains(strtolower($message), 'curl')) {
+        return 'Could not connect to Khalti. Please check internet connection and PHP cURL.';
+    }
+
+    return $message !== '' ? $default . ' Details: ' . $message : $default;
+}
