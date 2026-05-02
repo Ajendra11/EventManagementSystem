@@ -523,9 +523,8 @@ function get_event_categories(): array
 
     return $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
-```
 
-### Fixed / Improved ✅
+
 
 * Added `PDO::FETCH_ASSOC` for safer array access
 * Improved readability and formatting
