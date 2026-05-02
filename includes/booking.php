@@ -163,6 +163,25 @@ function create_booking(int $eventId, int $userId, int $quantity = 1): array
     }
 }
 
+/** Send a free-booking confirmation email with a QR ticket when available. */
+function send_free_booking_email(int $bookingId): void
+{
+    $qrUrl = ensure_booking_qr($bookingId);
+    $booking = get_booking_by_id($bookingId);
+    if (!$booking) {
+        return;
+    }
+
+    $attachment = qr_image_local_path($qrUrl);
+
+    send_email(
+        (string) $booking['email'],
+        'EventHub booking confirmed',
+        "Your booking for {$booking['event_title']} is confirmed.\nSeats: {$booking['quantity']}\nDate: {$booking['start_date']} at " . substr((string) $booking['start_time'], 0, 5) . "\nYour QR ticket is attached and available in My Bookings.",
+        $attachment ? [$attachment] : []
+    );
+}
+
 
 /** Confirm a paid booking after successful Khalti verification and generate QR ticket. */
 function confirm_paid_booking(int $bookingId, string $transactionId, array $payload = []): array
