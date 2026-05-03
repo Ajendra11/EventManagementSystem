@@ -23,6 +23,24 @@ function get_booking_by_id(int $bookingId, ?int $userId = null): ?array
     return $stmt->fetch() ?: null;
 }
 
+/** Fetch booking by Khalti PIDX. */
+function get_booking_by_pidx(string $pidx): ?array
+{
+    $stmt = db()->prepare(
+        'SELECT b.*, e.title AS event_title, e.start_date, e.start_time, e.location, e.price AS unit_price,
+                u.full_name, u.email
+         FROM bookings b
+         INNER JOIN events e ON e.id = b.event_id
+         INNER JOIN users u ON u.id = b.user_id
+         WHERE b.khalti_pidx = :pidx
+         LIMIT 1'
+    );
+    $stmt->execute(['pidx' => $pidx]);
+    return $stmt->fetch() ?: null;
+}
+
+
+
 function get_user_bookings(int $userId): array
 {
     $stmt = db()->prepare(
@@ -54,9 +72,7 @@ function get_all_bookings_admin(?string $statusFilter = null): array
     return $stmt->fetchAll();
 }
 
-// ── Booking creation (atomic) — FR-BP-01..03, FR-BP-10 ───────────────────────
-// Sprint 1: Free events only. Paid event booking deferred to Sprint 2 (Khalti).
-
+/** Create a free or paid booking atomically using a row-level event lock. */
 function create_booking(int $eventId, int $userId, int $quantity = 1): array
 {
     if ($quantity < 1 || $quantity > MAX_SEATS_PER_BOOKING) {
@@ -65,11 +81,11 @@ function create_booking(int $eventId, int $userId, int $quantity = 1): array
 
     $pdo = db();
     $pdo->beginTransaction();
+
     try {
-        // Lock the event row to prevent race conditions (FR-BP-02)
         $evtStmt = $pdo->prepare(
-            "SELECT id, status, start_date, start_time, capacity, price
-             FROM events WHERE id = :id FOR UPDATE"
+            'SELECT id, title, status, start_date, start_time, capacity, price
+             FROM events WHERE id = :id FOR UPDATE'
         );
         $evtStmt->execute(['id' => $eventId]);
         $event = $evtStmt->fetch();
@@ -83,30 +99,10 @@ function create_booking(int $eventId, int $userId, int $quantity = 1): array
             return ['error' => 'This event has already taken place.'];
         }
 
-        // Sprint 1: Only free events can be booked
-        if ((float) $event['price'] > 0) {
-            $pdo->rollBack();
-            return ['error' => 'Paid event booking is not available yet. Please check back for Sprint 2 when Khalti payment integration launches.'];
-        }
-
-        // Count seats already taken (Confirmed + Pending)
-        $takenStmt = $pdo->prepare(
-            "SELECT COALESCE(SUM(quantity),0) AS taken
-             FROM bookings WHERE event_id=:eid AND status IN ('Confirmed','Pending')"
-        );
-        $takenStmt->execute(['eid' => $eventId]);
-        $taken     = (int) $takenStmt->fetch()['taken'];
-        $seatsLeft = $event['capacity'] - $taken;
-
-        if ($seatsLeft < $quantity) {
-            $pdo->rollBack();
-            return ['error' => "Only $seatsLeft seat(s) remaining for this event."];
-        }
-
-        // FR-BP-03: no duplicate active booking per user+event
         $dupStmt = $pdo->prepare(
             "SELECT id FROM bookings
-             WHERE event_id=:eid AND user_id=:uid AND status IN ('Confirmed','Pending') LIMIT 1"
+             WHERE event_id = :eid AND user_id = :uid AND status IN ('Confirmed','Pending')
+             LIMIT 1"
         );
         $dupStmt->execute(['eid' => $eventId, 'uid' => $userId]);
         if ($dupStmt->fetch()) {
@@ -114,42 +110,126 @@ function create_booking(int $eventId, int $userId, int $quantity = 1): array
             return ['error' => 'You already have an active booking for this event.'];
         }
 
+        $takenStmt = $pdo->prepare(
+            "SELECT COALESCE(SUM(quantity),0) AS taken
+             FROM bookings WHERE event_id = :eid AND status IN ('Confirmed','Pending')"
+        );
+        $takenStmt->execute(['eid' => $eventId]);
+        $taken = (int) $takenStmt->fetch()['taken'];
+        $seatsLeft = (int) $event['capacity'] - $taken;
+
+        if ($seatsLeft < $quantity) {
+            $pdo->rollBack();
+            return ['error' => "Only $seatsLeft seat(s) remaining for this event."];
+        }
+
+        $unitPrice = (float) $event['price'];
+        $amount = $unitPrice * $quantity;
+        $status = $amount > 0 ? 'Pending' : 'Confirmed';
+
         $insStmt = $pdo->prepare(
-            'INSERT INTO bookings (user_id, event_id, quantity, amount, status, booking_date)
-             VALUES (:uid,:eid,:qty,:amount,"Pending",NOW())'
+            'INSERT INTO bookings (user_id, event_id, quantity, amount, status, booking_date, confirmed_at)
+             VALUES (:uid, :eid, :qty, :amount, :status, NOW(), :confirmed_at)'
         );
         $insStmt->execute([
-            'uid'    => $userId,
-            'eid'    => $eventId,
-            'qty'    => $quantity,
-            'amount' => 0.00,
+            'uid' => $userId,
+            'eid' => $eventId,
+            'qty' => $quantity,
+            'amount' => $amount,
+            'status' => $status,
+            'confirmed_at' => $status === 'Confirmed' ? date('Y-m-d H:i:s') : null,
         ]);
+
         $bookingId = (int) $pdo->lastInsertId();
-
         $pdo->commit();
-        return ['booking_id' => $bookingId, 'amount' => 0.00, 'is_free' => true];
 
-    } catch (\Throwable $e) {
-        $pdo->rollBack();
+        if ($status === 'Confirmed') {
+            ensure_booking_qr($bookingId);
+            send_free_booking_email($bookingId);
+        }
+
+        return [
+            'booking_id' => $bookingId,
+            'amount' => $amount,
+            'is_free' => $amount <= 0,
+            'status' => $status,
+        ];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         log_app_error('create_booking: ' . $e->getMessage(), __FILE__, __LINE__);
         return ['error' => 'A system error occurred. Please try again.'];
     }
 }
 
-/**
- * Confirm a free-event booking immediately (FR-BP-10).
- * Sprint 2 will extend this for paid bookings after Khalti verification.
- */
-function confirm_booking(int $bookingId): void
+/** Send a free-booking confirmation email with a QR ticket when available. */
+function send_free_booking_email(int $bookingId): void
 {
+    $qrUrl = ensure_booking_qr($bookingId);
+    $booking = get_booking_by_id($bookingId);
+    if (!$booking) {
+        return;
+    }
+
+    $attachment = qr_image_local_path($qrUrl);
+
+    send_email(
+        (string) $booking['email'],
+        'EventHub booking confirmed',
+        "Your booking for {$booking['event_title']} is confirmed.\nSeats: {$booking['quantity']}\nDate: {$booking['start_date']} at " . substr((string) $booking['start_time'], 0, 5) . "\nYour QR ticket is attached and available in My Bookings.",
+        $attachment ? [$attachment] : []
+    );
+}
+
+
+/** Confirm a paid booking after successful Khalti verification and generate QR ticket. */
+function confirm_paid_booking(int $bookingId, string $transactionId, array $payload = []): array
+{
+    $pdo = db();
+    $pdo->beginTransaction();
+
     try {
-        db()->prepare(
-            "UPDATE bookings SET status='Confirmed' WHERE id=:id AND status='Pending'"
-        )->execute(['id' => $bookingId]);
-    } catch (\Throwable $e) {
-        log_app_error('confirm_booking: ' . $e->getMessage(), __FILE__, __LINE__);
+        $stmt = $pdo->prepare('SELECT * FROM bookings WHERE id = :id AND status = "Pending" FOR UPDATE');
+        $stmt->execute(['id' => $bookingId]);
+        $booking = $stmt->fetch();
+
+        if (!$booking) {
+            $pdo->rollBack();
+            return ['Booking is not pending or no longer exists.'];
+        }
+
+        $pdo->prepare(
+            "UPDATE bookings
+             SET status = 'Confirmed', khalti_ref_id = :ref, confirmed_at = NOW()
+             WHERE id = :id"
+        )->execute(['ref' => $transactionId, 'id' => $bookingId]);
+
+        $pdo->commit();
+
+        $qrUrl = ensure_booking_qr($bookingId);
+        $fresh = get_booking_by_id($bookingId);
+        if ($fresh) {
+            $attachment = qr_image_local_path($qrUrl);
+            send_email(
+                (string) $fresh['email'],
+                'EventHub paid booking confirmed',
+                "Your paid booking for {$fresh['event_title']} is confirmed.\nSeats: {$fresh['quantity']}\nAmount: Rs. " . number_format((float) $fresh['amount'], 2) . "\nYour QR ticket is attached and available in My Bookings.",
+                $attachment ? [$attachment] : []
+            );
+        }
+
+        log_payment_event($bookingId, 'success', (float) ($fresh['amount'] ?? 0), 'confirmed', $payload);
+        return [];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        log_app_error('confirm_paid_booking: ' . $e->getMessage(), __FILE__, __LINE__);
+        return ['Unable to confirm booking.'];
     }
 }
+
 
 // ── Cancellation (US-006) ────────────────────────────────────────────────────
 // Sprint 1: Cancel and release seat (no refund processing needed for free events)
