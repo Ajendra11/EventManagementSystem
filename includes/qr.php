@@ -119,3 +119,18 @@ function generate_fallback_ticket_png(string $verificationUrl, string $path): vo
     file_put_contents($path . '.txt', $verificationUrl);
     log_app_error('QR generator unavailable. Stored verification URL beside fallback image: ' . $verificationUrl, __FILE__, __LINE__);
 }
+
+/** Fetch ticket details by QR token. */
+function get_ticket_by_token(string $token): ?array
+{
+    $stmt = db()->prepare(
+        'SELECT b.*, e.title AS event_title, e.start_date, e.start_time, u.full_name AS attendee_name
+         FROM bookings b
+         INNER JOIN events e ON e.id = b.event_id
+         INNER JOIN users u ON u.id = b.user_id
+         WHERE b.qr_token = :token
+         LIMIT 1'
+    );
+    $stmt->execute(['token' => $token]);
+    return $stmt->fetch() ?: null;
+}
