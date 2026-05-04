@@ -268,3 +268,29 @@ function cancel_booking(int $bookingId, int $userId): array
         return ['A system error occurred during cancellation.'];
     }
 }
+
+/** Expire all pending paid bookings older than 15 minutes. */
+function expire_pending_bookings(): int
+{
+    $stmt = db()->prepare(
+        "SELECT id, amount FROM bookings
+         WHERE status = 'Pending' AND booking_date < DATE_SUB(NOW(), INTERVAL 15 MINUTE)"
+    );
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    if (!$rows) {
+        return 0;
+    }
+
+    $ids = array_map(fn($r) => (int) $r['id'], $rows);
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    db()->prepare("UPDATE bookings SET status = 'Cancelled', cancelled_at = NOW() WHERE id IN ($placeholders)")
+        ->execute($ids);
+
+    foreach ($rows as $row) {
+        log_payment_event((int) $row['id'], 'auto_expiry', (float) $row['amount'], 'cancelled');
+    }
+
+    return count($rows);
+}
