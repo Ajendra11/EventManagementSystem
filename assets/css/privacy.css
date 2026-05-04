@@ -1,0 +1,43 @@
+@import url("./base-core.css");
+
+/* Center the entire privacy page */
+
+.container.section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.container.section .panel {
+  max-width: 900px;
+  width: 100%;
+  padding: 40px !important;
+  line-height: 1.85 !important;
+  text-align: center;
+}
+
+.container.section .panel > * {
+  text-align: left;
+}
+
+.container.section h1,
+.container.section .panel > h1,
+.container.section .panel > .muted {
+  text-align: center;
+}
+
+.container.section h1 {
+  font-size: clamp(2.2rem, 4vw, 3.3rem);
+  margin: 0 0 8px;
+  letter-spacing: -0.04em;
+}
+
+.container.section .panel h2 {
+  margin-top: 22px;
+  font-size: 1.22rem;
+}
+
+.container.section .panel h2:first-child {
+  margin-top: 0;
+}

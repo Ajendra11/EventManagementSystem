@@ -1,4 +1,4 @@
-```php
+
 <?php
 
 declare(strict_types=1);
@@ -56,6 +56,10 @@ function event_base_query(): string
 // ─────────────────────────────────────────────────────────────────────────────
 function get_featured_events(int $limit = 4): array
 {
+    $sql  = event_base_query()
+          . " WHERE e.status = 'Published' AND CONCAT(e.start_date,' ',e.start_time) >= NOW()"
+          . ' ORDER BY e.start_date ASC, e.start_time ASC LIMIT :lim';
+
     $sql = event_base_query() . "
         WHERE e.status = 'Published'
           AND CONCAT(e.start_date, ' ', e.start_time) >= NOW()
@@ -63,11 +67,15 @@ function get_featured_events(int $limit = 4): array
         LIMIT :lim
     ";
 
+
     $stmt = db()->prepare($sql);
     $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
     $stmt->execute();
 
+    return $stmt->fetchAll();
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -85,6 +93,13 @@ function search_events(array $filters = [], bool $admin = false): array
 
     // Search keyword
     if (!empty($filters['q'])) {
+
+        $search = '%' . trim($filters['q']) . '%';
+        $conditions[] = '(e.title LIKE :q_title OR e.category LIKE :q_category OR e.location LIKE :q_location)';
+        $params['q_title'] = $search;
+        $params['q_category'] = $search;
+        $params['q_location'] = $search;
+
         $conditions[] = "(
             e.title LIKE :q
             OR e.category LIKE :q
@@ -93,6 +108,7 @@ function search_events(array $filters = [], bool $admin = false): array
         )";
 
         $params['q'] = '%' . trim($filters['q']) . '%';
+
     }
 
     // Category filter
@@ -134,11 +150,15 @@ function search_events(array $filters = [], bool $admin = false): array
     $page  = max(1, (int) ($filters['page'] ?? 1));
     $pager = paginate($total, $page);
 
+
+    $sql  = event_base_query() . $where . ' ORDER BY e.start_date ASC, e.start_time ASC LIMIT :offset, :limit';
+
     // Main query
     $sql = event_base_query() . $where . "
         ORDER BY e.start_date ASC, e.start_time ASC
         LIMIT :offset, :limit
     ";
+
 
     $stmt = db()->prepare($sql);
 
@@ -172,6 +192,11 @@ function get_event(int $id, bool $admin = false): ?array
     $stmt = db()->prepare($sql);
     $stmt->execute(['id' => $id]);
 
+
+    return $stmt->fetch() ?: null;
+}
+
+
     $event = $stmt->fetch(PDO::FETCH_ASSOC);
 
     return $event ?: null;
@@ -189,6 +214,19 @@ function validate_event_data(array $data, bool $isNew = true): array
         $errors[] = 'Title must be between 3 and 150 characters.';
     }
 
+
+    if (trim($data['category'] ?? '') === '') {
+        $errors[] = 'Category is required.';
+    }
+
+    $locLen = mb_strlen(trim($data['location'] ?? ''));
+    if ($locLen < 3 || $locLen > 150) {
+        $errors[] = 'Location must be between 3 and 150 characters.';
+    }
+
+    $descLen = mb_strlen(trim($data['description'] ?? ''));
+    if ($descLen < 20 || $descLen > 2000) {
+
     $category = trim($data['category'] ?? '');
     if ($category === '') {
         $errors[] = 'Category is required.';
@@ -201,6 +239,7 @@ function validate_event_data(array $data, bool $isNew = true): array
 
     $description = trim($data['description'] ?? '');
     if (mb_strlen($description) < 20 || mb_strlen($description) > 2000) {
+
         $errors[] = 'Description must be between 20 and 2000 characters.';
     }
 
@@ -211,9 +250,14 @@ function validate_event_data(array $data, bool $isNew = true): array
         $errors[] = 'Start date cannot be in the past.';
     }
 
+
+    if (!preg_match('/^\d{2}:\d{2}$/', $data['start_time'] ?? '')) {
+        $errors[] = 'Start time is invalid.';
+
     $startTime = $data['start_time'] ?? '';
     if (!preg_match('/^\d{2}:\d{2}$/', $startTime)) {
         $errors[] = 'Invalid start time.';
+
     }
 
     $capacity = (int) ($data['capacity'] ?? 0);
@@ -246,12 +290,22 @@ function save_event(
     $isNew = $eventId === null;
 
     $errors = validate_event_data($data, $isNew);
+
+
+    if ($errors) {
+
     if (!empty($errors)) {
+
         return $errors;
     }
 
     $bannerImage = trim($data['banner_image'] ?? '') ?: null;
 
+
+    if ($fileInput && isset($fileInput['error']) && $fileInput['error'] !== UPLOAD_ERR_NO_FILE) {
+        $upload = handle_banner_upload($fileInput);
+
+        if (isset($upload['error'])) {
     // Handle uploaded image
     if (
         $fileInput !== null
@@ -261,6 +315,7 @@ function save_event(
         $upload = handle_banner_upload($fileInput);
 
         if (!empty($upload['error'])) {
+
             return [$upload['error']];
         }
 
@@ -284,13 +339,24 @@ function save_event(
 
     // Create new event
     if ($isNew) {
+
+        $slug = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($payload['title'])));
+
         $slug = strtolower(trim($payload['title']));
         $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+
         $slug = trim($slug, '-') . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
 
         $payload['slug'] = $slug;
         $payload['created_by'] = $userId;
 
+
+        $sql = 'INSERT INTO events
+                    (title, slug, category, location, description, start_date, start_time,
+                     capacity, price, banner_image, status, created_by, created_at, updated_at)
+                VALUES
+                    (:title, :slug, :category, :location, :description, :start_date, :start_time,
+                     :capacity, :price, :banner_image, :status, :created_by, NOW(), NOW())';
         $sql = "
             INSERT INTO events (
                 title,
@@ -324,6 +390,7 @@ function save_event(
                 NOW()
             )
         ";
+
     } else {
         $existing = get_event($eventId, true);
 
@@ -332,6 +399,21 @@ function save_event(
         }
 
         $payload['id'] = $eventId;
+
+
+        $sql = 'UPDATE events SET
+                    title = :title,
+                    category = :category,
+                    location = :location,
+                    description = :description,
+                    start_date = :start_date,
+                    start_time = :start_time,
+                    capacity = :capacity,
+                    price = :price,
+                    banner_image = :banner_image,
+                    status = :status,
+                    updated_at = NOW()
+                WHERE id = :id';
 
         $sql = "
             UPDATE events SET
@@ -348,6 +430,7 @@ function save_event(
                 updated_at = NOW()
             WHERE id = :id
         ";
+
     }
 
     $stmt = db()->prepare($sql);
@@ -404,6 +487,12 @@ function get_admin_stats(): array
     $pdo = db();
 
     return [
+
+        'users'              => (int) $pdo->query("SELECT COUNT(*) FROM users WHERE status='active'")->fetchColumn(),
+        'events'             => (int) $pdo->query('SELECT COUNT(*) FROM events')->fetchColumn(),
+        'published_events'   => (int) $pdo->query("SELECT COUNT(*) FROM events WHERE status='Published'")->fetchColumn(),
+        'confirmed_bookings' => (int) $pdo->query("SELECT COUNT(*) FROM bookings WHERE status='Confirmed'")->fetchColumn(),
+
         'users' => (int) $pdo->query(
             "SELECT COUNT(*) FROM users WHERE status = 'active'"
         )->fetchColumn(),
@@ -419,6 +508,7 @@ function get_admin_stats(): array
         'confirmed_bookings' => (int) $pdo->query(
             "SELECT COUNT(*) FROM bookings WHERE status = 'Confirmed'"
         )->fetchColumn(),
+
     ];
 }
 
