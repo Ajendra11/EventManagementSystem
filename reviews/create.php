@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../includes/layout.php';
-require_once __DIR__ . '/../includes/review.php';
-require_once __DIR__ . '/../includes/event.php';
+require_once DIR . '/../includes/layout.php';
+require_once DIR . '/../includes/review.php';
+require_once DIR . '/../includes/event.php';
 
 require_login();
 if (is_admin()) {
@@ -41,15 +41,6 @@ render_header('Write Review');
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
         <input type="hidden" name="event_id" value="<?= (int)$eventId ?>">
 
-        <div class="form-group">
-            <label>Rating *</label>
-            <select name="rating" required>
-                <option value="">Select rating</option>
-                <?php for ($i = 5; $i >= 1; $i--): ?>
-                    <option value="<?= $i ?>" <?= ((int)($_POST['rating'] ?? 0) === $i) ? 'selected' : '' ?>><?= $i ?> star<?= $i > 1 ? 's' : '' ?></option>
-                <?php endfor; ?>
-            </select>
-        </div>
 
         <div class="form-group">
             <label>Comment <span class="muted">(optional, max 1000 characters)</span></label>
