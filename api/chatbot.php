@@ -328,3 +328,133 @@ function build_local_chatbot_reply(string $message, array $events, array $bookin
     return 'I can help with EventHub events, prices, seats, venues, dates, and booking status. '
          . 'The general AI service is not available right now.';
 }
+
+/*
+ |-------------------------------------------------------------------------
+ | Get event recommendations based on user's interest message
+ |-------------------------------------------------------------------------
+ */
+function get_event_recommendations(string $message): array
+{
+    $lower = strtolower($message);
+    $pdo = db();
+    
+    // Define keyword categories
+    $categories = [];
+    
+    // Tech/IT related
+    if (str_contains($lower, 'tech') || str_contains($lower, 'it') || str_contains($lower, 'programming') || 
+        str_contains($lower, 'coding') || str_contains($lower, 'developer') || str_contains($lower, 'hackathon')) {
+        $categories = array_merge($categories, ['Hackathon', 'Conference', 'Workshop']);
+    }
+    
+    // UI/UX / Design related
+    if (str_contains($lower, 'ui') || str_contains($lower, 'ux') || str_contains($lower, 'design') || 
+        str_contains($lower, 'figma') || str_contains($lower, 'prototype')) {
+        $categories = array_merge($categories, ['Workshop', 'UI/UX']);
+    }
+    
+    // Business / Networking
+    if (str_contains($lower, 'network') || str_contains($lower, 'business') || str_contains($lower, 'career') || 
+        str_contains($lower, 'job') || str_contains($lower, 'summit')) {
+        $categories = array_merge($categories, ['Networking', 'Conference', 'Summit']);
+    }
+    
+    // Free events
+    if (str_contains($lower, 'free') || str_contains($lower, 'cost')) {
+        $sql = "
+            SELECT id, title, category, location, start_date, start_time, price,
+                   capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE event_id = e.id AND status IN ('Confirmed', 'Pending')), 0) as seats_left
+            FROM events e
+            WHERE status = 'Published' 
+            AND CONCAT(start_date, ' ', start_time) > NOW()
+            AND price = 0
+            ORDER BY start_date ASC
+            LIMIT 5
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $freeEvents = $stmt->fetchAll();
+        if (!empty($freeEvents)) {
+            return $freeEvents;
+        }
+    }
+    
+    // Search by categories
+    if (!empty($categories)) {
+        $uniqueCategories = array_unique($categories);
+        $placeholders = implode(',', array_fill(0, count($uniqueCategories), '?'));
+        $sql = "
+            SELECT id, title, category, location, start_date, start_time, price,
+                   capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE event_id = e.id AND status IN ('Confirmed', 'Pending')), 0) as seats_left
+            FROM events e
+            WHERE status = 'Published' 
+            AND CONCAT(start_date, ' ', start_time) > NOW()
+            AND category IN ($placeholders)
+            ORDER BY start_date ASC
+            LIMIT 5
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($uniqueCategories);
+        $results = $stmt->fetchAll();
+        if (!empty($results)) {
+            return $results;
+        }
+    }
+    
+    // Return upcoming events as fallback
+    $sql = "
+        SELECT id, title, category, location, start_date, start_time, price,
+               capacity - COALESCE((SELECT SUM(quantity) FROM bookings WHERE event_id = e.id AND status IN ('Confirmed', 'Pending')), 0) as seats_left
+        FROM events e
+        WHERE status = 'Published' 
+        AND CONCAT(start_date, ' ', start_time) > NOW()
+        ORDER BY start_date ASC
+        LIMIT 5
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll();
+}
+
+/*
+|-----------------------------------------------------------------
+|Format event recommendations for display
+|-----------------------------------------------------------------
+*/
+function format_event_recommendations(array $events): string
+{
+    if (empty($events)) {
+        return "No upcoming events found matching your interest.";
+    }
+
+    $lines = ["Here are some events you might like:"];
+    $lines[] = "";
+
+    foreach ($events as $event) {
+        $price = (float) $event['price'] > 0 
+            ? 'Rs. ' . number_format((float) $event['price'], 0) 
+            : 'Free';
+
+        $seats = (int) $event['seats_left'];
+        $seatsText = $seats > 0 ? $seats . " seats available" : "Sold out";
+
+        $date = date('M j, Y', strtotime($event['start_date']));
+        $time = substr($event['start_time'], 0, 5);
+
+        $lines[] = "----------------------------------------";
+        $lines[] = "Title: " . $event['title'];
+        $lines[] = "Category: " . $event['category'];
+        $lines[] = "Location: " . $event['location'];
+        $lines[] = "Date: " . $date . " at " . $time;
+        $lines[] = "Price: " . $price;
+        $lines[] = "Seats: " . $seatsText;
+        $lines[] = "Link: " . APP_URL . "/events/show.php?id=" . $event['id'];
+    }
+
+    $lines[] = "----------------------------------------";
+    $lines[] = "";
+    $lines[] = "Tip: Click any event link to book or view details!";
+
+    return implode("\n", $lines);
+}
