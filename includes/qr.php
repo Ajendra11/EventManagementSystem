@@ -134,3 +134,23 @@ function get_ticket_by_token(string $token): ?array
     $stmt->execute(['token' => $token]);
     return $stmt->fetch() ?: null;
 }
+
+/** Mark a QR ticket checked-in once. */
+function check_in_ticket(string $token, int $adminId): array
+{
+    $ticket = get_ticket_by_token($token);
+    if (!$ticket) {
+        return ['Ticket not found.'];
+    }
+    if ($ticket['status'] !== 'Confirmed') {
+        return ['Only confirmed tickets can be checked in.'];
+    }
+    if (!empty($ticket['checked_in_at'])) {
+        return ['This ticket has already been checked in.'];
+    }
+
+    db()->prepare('UPDATE bookings SET checked_in_at = NOW(), checked_in_by = :aid WHERE id = :id AND checked_in_at IS NULL')
+        ->execute(['aid' => $adminId, 'id' => $ticket['id']]);
+    audit_log('ticket_checked_in', 'booking', (int) $ticket['id']);
+    return [];
+}
