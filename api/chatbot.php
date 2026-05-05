@@ -330,9 +330,9 @@ function build_local_chatbot_reply(string $message, array $events, array $bookin
 }
 
 /*
- /-------------------------------------------------------------------------
- / Get event recommendations based on user's interest message
- /-------------------------------------------------------------------------
+ |-------------------------------------------------------------------------
+ | Get event recommendations based on user's interest message
+ |-------------------------------------------------------------------------
  */
 function get_event_recommendations(string $message): array
 {
@@ -415,4 +415,46 @@ function get_event_recommendations(string $message): array
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll();
+}
+
+/*
+|-----------------------------------------------------------------
+|Format event recommendations for display
+|-----------------------------------------------------------------
+*/
+function format_event_recommendations(array $events): string
+{
+    if (empty($events)) {
+        return "No upcoming events found matching your interest.";
+    }
+
+    $lines = ["Here are some events you might like:"];
+    $lines[] = "";
+
+    foreach ($events as $event) {
+        $price = (float) $event['price'] > 0 
+            ? 'Rs. ' . number_format((float) $event['price'], 0) 
+            : 'Free';
+
+        $seats = (int) $event['seats_left'];
+        $seatsText = $seats > 0 ? $seats . " seats available" : "Sold out";
+
+        $date = date('M j, Y', strtotime($event['start_date']));
+        $time = substr($event['start_time'], 0, 5);
+
+        $lines[] = "----------------------------------------";
+        $lines[] = "Title: " . $event['title'];
+        $lines[] = "Category: " . $event['category'];
+        $lines[] = "Location: " . $event['location'];
+        $lines[] = "Date: " . $date . " at " . $time;
+        $lines[] = "Price: " . $price;
+        $lines[] = "Seats: " . $seatsText;
+        $lines[] = "Link: " . APP_URL . "/events/show.php?id=" . $event['id'];
+    }
+
+    $lines[] = "----------------------------------------";
+    $lines[] = "";
+    $lines[] = "Tip: Click any event link to book or view details!";
+
+    return implode("\n", $lines);
 }
