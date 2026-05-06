@@ -146,3 +146,68 @@ function change_password(int $userId, string $currentPass, string $newPass, stri
         ->execute(['h' => password_hash($newPass, PASSWORD_BCRYPT, ['cost' => 12]), 'id' => $userId]);
     return [];
 }
+/** Create and email an account verification token. */
+function create_email_verification(int $userId, string $email): void
+{
+    $token = generate_secure_token(32);
+    db()->prepare('DELETE FROM email_verifications WHERE user_id = :uid OR expires_at < NOW()')
+        ->execute(['uid' => $userId]);
+
+    db()->prepare(
+        'INSERT INTO email_verifications (user_id, token, expires_at, created_at)
+         VALUES (:uid, :token, DATE_ADD(NOW(), INTERVAL 24 HOUR), NOW())'
+    )->execute(['uid' => $userId, 'token' => $token]);
+
+    $link = APP_URL . '/auth/verify-email.php?token=' . urlencode($token);
+    send_email(
+        $email,
+        'Verify your EventHub email',
+        "Welcome to EventHub.\n\nPlease verify your email address using this link:\n$link\n\nThis link expires in 24 hours."
+    );
+}
+
+/** Verify an email-verification token and activate the user email. */
+function verify_email_token(string $token): array
+{
+    $stmt = db()->prepare(
+        'SELECT ev.*, u.email
+         FROM email_verifications ev
+         INNER JOIN users u ON u.id = ev.user_id
+         WHERE ev.token = :token AND ev.used_at IS NULL
+         LIMIT 1'
+    );
+    $stmt->execute(['token' => $token]);
+    $record = $stmt->fetch();
+
+    if (!$record || strtotime((string) $record['expires_at']) < time()) {
+        return ['Invalid or expired verification link.'];
+    }
+
+    db()->beginTransaction();
+    try {
+        db()->prepare('UPDATE users SET email_verified_at = NOW() WHERE id = :uid')
+            ->execute(['uid' => $record['user_id']]);
+        db()->prepare('UPDATE email_verifications SET used_at = NOW() WHERE id = :id')
+            ->execute(['id' => $record['id']]);
+        db()->commit();
+        return [];
+    } catch (Throwable $e) {
+        db()->rollBack();
+        log_app_error('verify_email_token: ' . $e->getMessage(), __FILE__, __LINE__);
+        return ['Unable to verify email right now. Please try again.'];
+    }
+}
+
+/** Resend a verification token for an unverified account. */
+function resend_verification_email(string $email): array
+{
+    $user = find_user_by_email($email);
+    if (!$user) {
+        return []; // avoid account enumeration
+    }
+    if (!empty($user['email_verified_at'])) {
+        return ['This email address is already verified.'];
+    }
+    create_email_verification((int) $user['id'], (string) $user['email']);
+    return [];
+}
