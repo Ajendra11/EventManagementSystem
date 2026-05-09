@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/layout.php';
 require_once __DIR__ . '/../includes/event.php';
+require_once __DIR__ . '/../includes/review.php'; 
 
 $event = get_event((int)($_GET['id'] ?? 0));
 if (!$event) { flash('error', 'Event not found or no longer available.'); redirect('events/index.php'); }
@@ -10,6 +11,8 @@ $seatsLeft = (int)$event['seats_left'];
 $isPaid    = (float)$event['price'] > 0;
 $canBook   = is_logged_in() && !is_admin() && $status === 'Open' && !$isPaid;
 $maxQty    = min($seatsLeft, MAX_SEATS_PER_BOOKING);
+$reviewPage = max(1, (int)($_GET['reviews_page'] ?? 1));
+$reviews = get_event_reviews((int)$event['id'], $reviewPage);
 
 render_header($event['title']);
 ?>
@@ -26,6 +29,23 @@ render_header($event['title']);
             </div>
             <h1 style="font-size:1.8rem;margin:.5rem 0 1rem;"><?= e($event['title']) ?></h1>
             <p style="line-height:1.8;"><?= nl2br(e($event['description'])) ?></p>
+
+            <?php if (!$reviews['items']): ?>
+                <div class="panel empty">No approved reviews yet.</div>
+            <?php else: ?>
+                <?php foreach ($reviews['items'] as $review): ?>
+                    <div class="panel" style="margin:.75rem 0;">
+                        <div class="status-row">
+                            <strong><?= e($review['reviewer_first_name']) ?></strong>
+                            <span class="badge">★ <?= (int)$review['rating'] ?>/5</span>
+                            <span class="muted"><?= e(substr($review['created_at'], 0, 10)) ?></span>
+                        </div>
+                        <?php if (!empty($review['comment'])): ?>
+                            <p><?= nl2br(e($review['comment'])) ?></p>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </article>
 
         <aside style="align-self:start;position:sticky;top:80px;">
@@ -42,12 +62,12 @@ render_header($event['title']);
                         <?php else: ?>
                             <strong class="price-tag free">Free</strong>
                         <?php endif; ?>
-                    </td></tr>
+                    </td>
                     <tr><th>Seats</th><td><?= $seatsLeft ?> / <?= (int)$event['capacity'] ?> remaining
                         <?php if ($seatsLeft === 0): ?>
                             <span class="badge danger" style="font-size:.75rem;">Sold Out</span>
                         <?php endif; ?>
-                    </td></tr>
+                    </td>
                 </table>
 
                 <?php if ($canBook): ?>
