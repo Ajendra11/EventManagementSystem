@@ -269,6 +269,21 @@ function cancel_booking(int $bookingId, int $userId): array
     }
 }
 
+/** Cancel pending payment-stage booking for its owner. */
+function cancel_pending_booking(int $bookingId, int $userId): array
+{
+    $booking = get_booking_by_id($bookingId, $userId);
+    if (!$booking || $booking['status'] !== 'Pending') {
+        return ['Pending booking not found.'];
+    }
+
+    db()->prepare("UPDATE bookings SET status = 'Cancelled', cancelled_at = NOW() WHERE id = :id AND user_id = :uid")
+        ->execute(['id' => $bookingId, 'uid' => $userId]);
+
+    log_payment_event($bookingId, 'payment_cancelled', (float) $booking['amount'], 'cancelled_by_user');
+    return [];
+}
+
 /** Expire all pending paid bookings older than 15 minutes. */
 function expire_pending_bookings(): int
 {
