@@ -1,5 +1,24 @@
 <?php
 
+/** Record a Khalti/payment lifecycle event for admin/audit tracking. */
+function log_payment_event(?int $bookingId, string $event, float $amount, string $status, array $payload = []): void
+{
+    try {
+        db()->prepare(
+            'INSERT INTO payment_logs (booking_id, event, amount, status, payload, created_at)
+             VALUES (:bid, :event, :amount, :status, :payload, NOW())'
+        )->execute([
+            'bid' => $bookingId,
+            'event' => $event,
+            'amount' => $amount,
+            'status' => $status,
+            'payload' => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+        ]);
+    } catch (Throwable $e) {
+        log_app_error('log_payment_event: ' . $e->getMessage(), __FILE__, __LINE__);
+    }
+}
+
 function khalti_is_mock_mode(): bool
 {
     return KHALTI_MODE === 'mock';
@@ -242,4 +261,86 @@ function verify_khalti_payment(string $pidx): array
         'status' => 'LookupFailed',
         'payload' => $response,
     ];
+}
+
+/** Verify Khalti return/lookup metadata against the booking. */
+function khalti_validate_booking_payment(array $booking, array $returnPayload, array $lookupPayload): array
+{
+    if (!empty($returnPayload['purchase_order_id']) && (string) $returnPayload['purchase_order_id'] !== (string) $booking['id']) {
+        return ['Khalti purchase order does not match this booking.'];
+    }
+
+    foreach (['amount', 'total_amount'] as $amountKey) {
+        if (isset($lookupPayload[$amountKey]) && is_numeric($lookupPayload[$amountKey])) {
+            $expected = (int) round((float) $booking['amount'] * 100);
+            $actual = (int) $lookupPayload[$amountKey];
+            if ($actual !== $expected) {
+                return ['Khalti amount does not match the booking amount.'];
+            }
+        }
+    }
+
+    return [];
+}
+
+/** Translate common Khalti/API errors into user-friendly text. */
+function khalti_friendly_error(array $response, string $default): string
+{
+    $status = (int) ($response['status'] ?? 0);
+    $message = (string) ($response['message'] ?? '');
+
+    if ($status === 401 || str_contains(strtolower($message), 'unauthorized')) {
+        return 'Khalti authentication failed. Please check KHALTI_SECRET_KEY in .env.';
+    }
+
+    if ($status === 400) {
+        return 'Khalti rejected the payment request. Please check amount, return URL, and Khalti merchant settings.';
+    }
+
+    if ($status === 0 && trim((string) KHALTI_SECRET_KEY) === '' && !khalti_is_mock_mode()) {
+        return 'KHALTI_SECRET_KEY is required when KHALTI_MODE is not mock.';
+    }
+
+    if ($status === 0 && str_contains(strtolower($message), 'curl')) {
+        return 'Could not connect to Khalti. Please check internet connection and PHP cURL.';
+    }
+
+    return $message !== '' ? $default . ' Details: ' . $message : $default;
+}
+
+/** Refund paid bookings. Mock mode succeeds; real mode calls Khalti when configured. */
+function refund_khalti_payment(array $booking): array
+{
+    $bookingId = (int) $booking['id'];
+    $amount = (float) $booking['amount'];
+
+    if (khalti_is_mock_mode()) {
+        log_payment_event($bookingId, 'refund', $amount, 'mock_success', ['booking_id' => $bookingId]);
+        return ['ok' => true, 'payload' => ['mode' => 'mock']];
+    }
+
+    if (trim((string) KHALTI_SECRET_KEY) === '') {
+        log_payment_event($bookingId, 'refund', $amount, 'failed', ['reason' => 'Missing KHALTI_SECRET_KEY']);
+        return ['ok' => false, 'payload' => ['reason' => 'Missing KHALTI_SECRET_KEY']];
+    }
+
+    $payload = [
+        'pidx' => (string) ($booking['khalti_pidx'] ?? ''),
+        'amount' => (int) round($amount * 100),
+    ];
+
+    $response = khalti_api_request('/epayment/refund/', $payload);
+    $ok = (bool) ($response['ok'] ?? false);
+
+    log_payment_event($bookingId, 'refund', $amount, $ok ? 'success' : 'failed', $response);
+
+    if (!$ok) {
+        send_email(
+            ADMIN_EMAIL,
+            'EventHub refund failure',
+            "Refund failed for booking #$bookingId. Please check the admin payment logs."
+        );
+    }
+
+    return ['ok' => $ok, 'payload' => $response];
 }

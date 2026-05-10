@@ -163,6 +163,25 @@ function create_booking(int $eventId, int $userId, int $quantity = 1): array
     }
 }
 
+/** Send a free-booking confirmation email with a QR ticket when available. */
+function send_free_booking_email(int $bookingId): void
+{
+    $qrUrl = ensure_booking_qr($bookingId);
+    $booking = get_booking_by_id($bookingId);
+    if (!$booking) {
+        return;
+    }
+
+    $attachment = qr_image_local_path($qrUrl);
+
+    send_email(
+        (string) $booking['email'],
+        'EventHub booking confirmed',
+        "Your booking for {$booking['event_title']} is confirmed.\nSeats: {$booking['quantity']}\nDate: {$booking['start_date']} at " . substr((string) $booking['start_time'], 0, 5) . "\nYour QR ticket is attached and available in My Bookings.",
+        $attachment ? [$attachment] : []
+    );
+}
+
 
 /** Confirm a paid booking after successful Khalti verification and generate QR ticket. */
 function confirm_paid_booking(int $bookingId, string $transactionId, array $payload = []): array
@@ -248,4 +267,45 @@ function cancel_booking(int $bookingId, int $userId): array
         log_app_error('cancel_booking: ' . $e->getMessage(), __FILE__, __LINE__);
         return ['A system error occurred during cancellation.'];
     }
+}
+
+/** Cancel pending payment-stage booking for its owner. */
+function cancel_pending_booking(int $bookingId, int $userId): array
+{
+    $booking = get_booking_by_id($bookingId, $userId);
+    if (!$booking || $booking['status'] !== 'Pending') {
+        return ['Pending booking not found.'];
+    }
+
+    db()->prepare("UPDATE bookings SET status = 'Cancelled', cancelled_at = NOW() WHERE id = :id AND user_id = :uid")
+        ->execute(['id' => $bookingId, 'uid' => $userId]);
+
+    log_payment_event($bookingId, 'payment_cancelled', (float) $booking['amount'], 'cancelled_by_user');
+    return [];
+}
+
+/** Expire all pending paid bookings older than 15 minutes. */
+function expire_pending_bookings(): int
+{
+    $stmt = db()->prepare(
+        "SELECT id, amount FROM bookings
+         WHERE status = 'Pending' AND booking_date < DATE_SUB(NOW(), INTERVAL 15 MINUTE)"
+    );
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    if (!$rows) {
+        return 0;
+    }
+
+    $ids = array_map(fn($r) => (int) $r['id'], $rows);
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    db()->prepare("UPDATE bookings SET status = 'Cancelled', cancelled_at = NOW() WHERE id IN ($placeholders)")
+        ->execute($ids);
+
+    foreach ($rows as $row) {
+        log_payment_event((int) $row['id'], 'auto_expiry', (float) $row['amount'], 'cancelled');
+    }
+
+    return count($rows);
 }
