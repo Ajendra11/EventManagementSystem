@@ -1,358 +1,545 @@
-/* admin-core.css */
+/* =========================================================
+   EventHub Admin Shell
+   Uses semantic tokens from assets/css/theme.css only.
+========================================================= */
 
-:root {
-  --admin-sidebar-bg: #030408;
-  --admin-sidebar-border: rgba(255, 255, 255, 0.05);
-  --admin-content-bg: #080b14;
-  --admin-sidebar-width: 320px;
-  --admin-sidebar-collapsed-width: 0px;
+html {
+  background: var(--background);
 }
 
 body.admin-body {
-  margin: 0;
-  padding: 0;
   min-height: 100vh;
-  background: var(--admin-content-bg);
-  color: #eef4ff;
+  margin: 0;
+  color: var(--foreground);
+  background: var(--page-glow);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
 }
 
-/* ===== Shell ===== */
+body.admin-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.22;
+  mask-image: linear-gradient(180deg, var(--foreground), transparent 78%);
+}
+
 .admin-layout-shell {
   min-height: 100vh;
   display: grid;
   grid-template-columns: var(--admin-sidebar-width) minmax(0, 1fr);
-  transition: grid-template-columns 0.34s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
+  transition: grid-template-columns var(--transition-slow);
 }
 
 body.sidebar-collapsed .admin-layout-shell {
-  grid-template-columns: var(--admin-sidebar-collapsed-width) minmax(0, 1fr);
+  grid-template-columns: var(--admin-sidebar-rail) minmax(0, 1fr);
 }
 
-/* ===== Sidebar ===== */
 .admin-sidebar {
-  width: var(--admin-sidebar-width);
-  min-width: var(--admin-sidebar-width);
-  background: var(--admin-sidebar-bg);
-  border-right: 1px solid var(--admin-sidebar-border);
-  height: 100vh;
   position: sticky;
   top: 0;
+  z-index: 40;
+  height: 100vh;
+  width: var(--admin-sidebar-width);
+  min-width: var(--admin-sidebar-width);
   display: flex;
   flex-direction: column;
+  background: linear-gradient(180deg, var(--surface-1), var(--surface-0));
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  z-index: 40;
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35);
-  transition:
-    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.24s ease,
-    width 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    min-width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width var(--transition-slow), min-width var(--transition-slow), transform var(--transition-slow);
 }
 
 body.sidebar-collapsed .admin-sidebar {
-  width: 0;
-  min-width: 0;
-  border-right: 0;
-  opacity: 0;
-  pointer-events: none;
+  width: var(--admin-sidebar-rail);
+  min-width: var(--admin-sidebar-rail);
 }
 
 .admin-sidebar-header {
-  padding: 30px 24px;
-  border-bottom: 1px solid var(--admin-sidebar-border);
+  min-height: 96px;
+  padding: 26px 22px 18px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .admin-brand {
-  font-size: 1.6rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #ffffff 0%, #d9c7ff 52%, #74e2ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: block;
+  display: grid;
+  gap: 2px;
   text-decoration: none;
+  min-width: 0;
+}
+
+.admin-brand-word {
+  font-size: 1.46rem;
+  line-height: 1;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.admin-brand-sub {
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+body.sidebar-collapsed .admin-brand-sub,
+body.sidebar-collapsed .admin-brand-word {
+  opacity: 0;
 }
 
 .admin-sidebar-nav {
   flex: 1;
-  padding: 24px 16px;
-  overflow-y: auto;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow-y: auto;
+}
+
+.admin-sidebar-bottom {
+  padding: 16px 16px 22px;
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--border);
 }
 
 .admin-nav-item {
+  position: relative;
+  min-height: 44px;
+  padding: 0 14px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  color: var(--text-soft);
-  font-size: 0.95rem;
-  font-weight: 600;
+  color: var(--muted-foreground);
+  font-size: 0.84rem;
+  font-weight: 850;
   text-decoration: none;
-  transition: all 0.28s ease;
-  position: relative;
   overflow: hidden;
 }
 
-.admin-nav-item::before {
+.admin-nav-item::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), transparent);
+  right: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
   opacity: 0;
-  transition: opacity 0.28s ease;
+  transition: opacity var(--transition-base);
 }
 
-.admin-nav-item > span {
-  position: relative;
-  z-index: 1;
-}
-
-.admin-nav-item:hover,
-.admin-nav-item.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.admin-nav-item:hover::before,
-.admin-nav-item.active::before {
+.admin-nav-item:hover::after,
+.admin-nav-item.active::after {
   opacity: 1;
 }
 
-.admin-nav-item.active {
-  border-left: 3px solid var(--primary);
-  border-radius: 4px 14px 14px 4px;
-}
-
-.admin-sidebar-divider {
-  margin-top: 24px;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
-}
-
-.admin-sidebar-footer {
-  padding: 20px 24px;
-  border-top: 1px solid var(--admin-sidebar-border);
-}
-
-.admin-user-info {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
-}
-
-.admin-user-name {
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.admin-user-role {
-  color: var(--text-soft);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.admin-logout-btn {
-  display: block;
-  text-align: center;
-  padding: 10px;
-  border-radius: 10px;
-  background: rgba(251, 113, 133, 0.1);
-  color: #fb7185;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.admin-logout-btn:hover {
-  background: #fb7185;
-  color: #fff;
-  box-shadow: 0 4px 15px rgba(251, 113, 133, 0.3);
-}
-
-/* ===== Main ===== */
-.admin-main {
-  min-width: 0;
-  width: 100%;
-  padding: 32px 36px;
-  transition:
-    padding 0.34s cubic-bezier(0.22, 1, 0.36, 1),
-    width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-body.sidebar-collapsed .admin-main {
-  padding-left: 28px;
-  padding-right: 28px;
-}
-
-.admin-main-topbar {
-  display: flex;
+.admin-nav-icon {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 20px;
+  justify-content: center;
+  color: currentColor;
 }
 
-.admin-main-topbar-title {
-  color: #8da0bf;
-  font-size: 0.95rem;
-  font-weight: 600;
+.admin-nav-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-nav-item > span:last-child {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+body.sidebar-collapsed .admin-nav-item,
+body.sidebar-collapsed .admin-theme-toggle {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+body.sidebar-collapsed .admin-nav-item > span:last-child,
+body.sidebar-collapsed .admin-user-info,
+body.sidebar-collapsed .admin-theme-toggle-text {
   display: none;
 }
 
-/* ===== Toggle buttons ===== */
+.admin-user-info {
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+}
+
+.admin-user-name,
+.admin-user-role {
+  display: block;
+}
+
+.admin-user-name {
+  font-size: 0.93rem;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.admin-user-role {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-main {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 42px 34px 46px;
+}
+
+.admin-main-topbar {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 12px;
+}
+
+.admin-main-topbar-title {
+  font-size: 0.96rem;
+  font-weight: 900;
+}
+
 .admin-sidebar-toggle,
 .admin-sidebar-close {
-  border: 1px solid rgba(126, 159, 214, 0.16);
-  background: #152742;
-  color: #eef4ff;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 1.05rem;
-  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
-}
-
-.admin-sidebar-toggle:hover,
-.admin-sidebar-close:hover {
-  background: #203557;
-  transform: translateY(-1px);
 }
 
 .admin-sidebar-close {
-  margin-left: auto;
   display: none;
+  margin-left: auto;
 }
 
-body.sidebar-collapsed .admin-sidebar-toggle {
-  background: #1d3153;
-}
-
-/* ===== Flash ===== */
 .admin-flash-stack {
-  margin-bottom: 24px;
-  max-width: 100%;
+  position: relative;
+  z-index: 3;
+  margin: 0 0 22px;
 }
 
-/* ===== Backdrop ===== */
 .admin-sidebar-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(3, 8, 20, 0.55);
+  z-index: 30;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.24s ease;
-  z-index: 30;
+  transition: opacity var(--transition-base);
 }
 
-/* ===== Make page content actually expand ===== */
-.container,
-.container.section,
-.container.admin-dashboard-page,
-.container.admin-users-page,
-.container.admin-events-page,
-.container.admin-bookings-page {
+.admin-theme-toggle {
+  min-height: 44px;
+  width: 100%;
+  padding: 0 14px;
+  justify-content: flex-start;
+}
+
+.admin-theme-toggle-compact {
+  width: auto;
+  min-width: 116px;
+  margin-left: auto;
+}
+
+.admin-body table {
+  min-width: 900px;
+}
+
+.admin-body .container,
+.admin-body .container.section,
+.admin-dashboard-page,
+.admin-users-page,
+.admin-events-page,
+.admin-bookings-page {
   width: 100%;
   max-width: 100%;
-  transition: max-width 0.34s cubic-bezier(0.22, 1, 0.36, 1), width 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-body.sidebar-collapsed .container,
-body.sidebar-collapsed .container.section,
-body.sidebar-collapsed .container.admin-dashboard-page,
-body.sidebar-collapsed .container.admin-users-page,
-body.sidebar-collapsed .container.admin-events-page,
-body.sidebar-collapsed .container.admin-bookings-page {
-  max-width: 100% !important;
-  width: 100%;
+.admin-body .container.section {
+  padding-top: 0;
 }
 
-/* ===== Helpful grid expansion ===== */
-body.sidebar-collapsed .users-cards,
-body.sidebar-collapsed .events-cards,
-body.sidebar-collapsed .dashboard-stats-grid,
-body.sidebar-collapsed .admin-stats-grid {
-  width: 100%;
-}
-
-/* ===== Optional page title helpers ===== */
-.admin-topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
-}
-
-.admin-page-title {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0;
-  color: #fff;
-  letter-spacing: -0.02em;
-}
-
-.admin-page-subtitle {
-  color: var(--text-muted);
-  margin-top: 4px;
-  font-size: 0.95rem;
-}
-
-/* ===== Mobile ===== */
-@media (max-width: 980px) {
-  .admin-layout-shell {
+@media (max-width: 1100px) {
+  .admin-layout-shell,
+  body.sidebar-collapsed .admin-layout-shell {
     display: block;
+  }
+
+  .admin-main {
+    padding: 22px 18px 34px;
+  }
+
+  .admin-main-topbar {
+    display: flex;
   }
 
   .admin-sidebar {
     position: fixed;
-    top: 0;
     left: 0;
-    width: 300px;
-    min-width: 300px;
-    max-width: 84vw;
-    height: 100vh;
+    top: 0;
+    width: 286px;
+    min-width: 286px;
+    max-width: 86vw;
     transform: translateX(0);
+  }
+
+  body.sidebar-collapsed .admin-sidebar {
+    width: 286px;
+    min-width: 286px;
+    transform: translateX(-100%);
+  }
+
+  body.sidebar-collapsed .admin-nav-item > span:last-child,
+  body.sidebar-collapsed .admin-user-info,
+  body.sidebar-collapsed .admin-brand-word,
+  body.sidebar-collapsed .admin-brand-sub,
+  body.sidebar-collapsed .admin-theme-toggle-text {
+    display: initial;
     opacity: 1;
+  }
+
+  body.sidebar-collapsed .admin-nav-item,
+  body.sidebar-collapsed .admin-theme-toggle {
+    justify-content: flex-start;
+    padding: 0 14px;
   }
 
   .admin-sidebar-close {
     display: inline-flex;
   }
 
-  .admin-main {
-    width: 100%;
-    padding: 24px 20px;
-  }
-
-  body.sidebar-collapsed .admin-sidebar {
-    width: 300px;
-    min-width: 300px;
-    transform: translateX(-100%);
-    opacity: 1;
-    pointer-events: none;
-  }
-
   body:not(.sidebar-collapsed) .admin-sidebar-backdrop {
     opacity: 1;
     pointer-events: auto;
   }
+}
 
-  .admin-main-topbar-title {
-    display: block;
+@media (max-width: 560px) {
+  .admin-main {
+    padding-inline: 14px;
   }
+}
+/* =========================================================
+   Bookings Table Column Fix - Dipika Safe Patch
+   Fixes event name/date/amount wrapping in admin bookings table.
+========================================================= */
+
+.admin-bookings-page .table-wrap,
+.admin-reviews-page .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Prevent table from squeezing columns too much */
+.admin-bookings-page table,
+.admin-reviews-page table {
+  min-width: 1080px;
+  table-layout: auto;
+}
+
+/* # column */
+.admin-bookings-page th:nth-child(1),
+.admin-bookings-page td:nth-child(1) {
+  width: 64px;
+  min-width: 64px;
+  text-align: center;
+}
+
+/* Participant column */
+.admin-bookings-page th:nth-child(2),
+.admin-bookings-page td:nth-child(2) {
+  min-width: 260px;
+}
+
+/* Event column — this is the broken one */
+.admin-bookings-page th:nth-child(3),
+.admin-bookings-page td:nth-child(3) {
+  min-width: 260px;
+  width: 28%;
+}
+
+.admin-bookings-page td:nth-child(3) {
+  color: var(--foreground, #111827);
+  font-weight: 650;
+  line-height: 1.45;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Date column */
+.admin-bookings-page th:nth-child(4),
+.admin-bookings-page td:nth-child(4) {
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+/* Qty column */
+.admin-bookings-page th:nth-child(5),
+.admin-bookings-page td:nth-child(5) {
+  width: 80px;
+  min-width: 80px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Amount column */
+.admin-bookings-page th:nth-child(6),
+.admin-bookings-page td:nth-child(6) {
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+/* Status/actions columns should not crush the event name */
+.admin-bookings-page th:nth-child(n + 7),
+.admin-bookings-page td:nth-child(n + 7) {
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+/* Participant email should stay readable but not destroy layout */
+.admin-bookings-page td:nth-child(2) small,
+.admin-bookings-page td:nth-child(2) .muted,
+.admin-bookings-page td:nth-child(2) span {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--muted-foreground, #64748b);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+/* Mobile/tablet: allow horizontal scroll instead of ugly squeezed columns */
+@media (max-width: 900px) {
+  .admin-bookings-page .table-wrap {
+    border-radius: 16px;
+  }
+
+  .admin-bookings-page table {
+    min-width: 1050px;
+  }
+}
+/* =========================================================
+   Admin Brand Fix
+   Makes EventHub name clean and not cut off
+========================================================= */
+
+.admin-sidebar-header {
+  min-height: 82px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.admin-brand {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  color: var(--sidebar-foreground, #111827);
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.admin-brand-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  color: var(--primary, #6d5dfc);
+  background: color-mix(in srgb, var(--primary, #6d5dfc) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary, #6d5dfc) 20%, var(--sidebar-border, #e5e7eb));
+  border-radius: 13px;
+}
+
+.admin-brand-mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+.admin-brand-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.admin-brand-word {
+  display: block;
+  max-width: 100%;
+  color: var(--sidebar-foreground, #111827);
+  font-size: 1rem;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-brand-sub {
+  display: block;
+  max-width: 100%;
+  color: var(--muted-foreground, #64748b);
+  font-size: 0.62rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Collapsed sidebar */
+body.sidebar-collapsed .admin-brand-copy {
+  display: none;
+}
+
+/* Dark mode */
+[data-theme="dark"] .admin-brand-word {
+  color: var(--sidebar-foreground, #f4f7fb);
+}
+
+[data-theme="dark"] .admin-brand-mark {
+  color: var(--primary, #a99cff);
+  background: rgba(169, 156, 255, 0.12);
+  border-color: rgba(169, 156, 255, 0.22);
 }

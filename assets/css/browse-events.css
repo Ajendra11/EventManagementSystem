@@ -4,10 +4,7 @@
    PAGE BACKGROUND
 ========================================================= */
 body {
-  background:
-    radial-gradient(circle at top center, rgba(139, 92, 246, .17), transparent 28%),
-    radial-gradient(circle at 85% 15%, rgba(34, 211, 238, .14), transparent 24%),
-    linear-gradient(180deg, #060913 0%, #0a1020 56%, #090d17 100%);
+  background: var(--page-glow);
 }
 
 /* =========================================================

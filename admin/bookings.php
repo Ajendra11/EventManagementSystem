@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/admin_layout.php';
 require_once __DIR__ . '/../includes/booking.php';
 require_admin();
 
@@ -16,11 +16,11 @@ if (is_post()) {
 }
 
 $statusFilter = $_GET['status'] ?? '';
-$validFilters = ['', 'Pending', 'Confirmed', 'Cancelled'];
+$validFilters = ['', 'Pending', 'Confirmed', 'Cancelled', 'Refunded'];
 if (!in_array($statusFilter, $validFilters, true)) $statusFilter = '';
 
 $bookings = get_all_bookings_admin($statusFilter ?: null);
-render_header('Manage Bookings');
+render_admin_header('Manage Bookings', ['admin-bookings.css']);
 ?>
 <div class="container section">
     <h2>Manage bookings</h2>
@@ -41,7 +41,7 @@ render_header('Manage Bookings');
             <tbody>
             <?php if (!$bookings): ?><tr><td colspan="9" class="empty">No bookings found.</td></tr><?php endif; ?>
             <?php foreach ($bookings as $b): ?>
-                <?php $badgeClass = match($b['status']) { 'Confirmed' => 'success', 'Pending' => 'warning', 'Cancelled' => 'danger', default => '' }; ?>
+                <?php $badgeClass = match($b['status']) { 'Confirmed' => 'success', 'Pending' => 'warning', 'Cancelled' => 'danger', 'Refunded' => 'success', default => '' }; ?>
                 <tr>
                     <td><?= (int)$b['id'] ?></td>
                     <td><?= e($b['full_name']) ?><br><span class="muted"><?= e($b['email']) ?></span></td>
@@ -65,4 +65,4 @@ render_header('Manage Bookings');
         </table>
     </div>
 </div>
-<?php render_footer(); ?>
+<?php render_admin_footer(); ?>

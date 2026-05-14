@@ -85,4 +85,5 @@ function _send_smtp(string $to, string $subject, string $body, array $attachment
     } catch (\Throwable $e) {
         log_app_error('PHPMailer: ' . $e->getMessage(), __FILE__, __LINE__);
         return false;
-    }}
+    }
+}
