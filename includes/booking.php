@@ -3,21 +3,26 @@
 declare(strict_types=1);
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/mail.php';
+require_once __DIR__ . '/payment.php';
+require_once __DIR__ . '/qr.php';
 
-// ── Booking queries ───────────────────────────────────────────────────────────
-
+/** Fetch one booking, optionally restricted to a user to prevent IDOR. */
 function get_booking_by_id(int $bookingId, ?int $userId = null): ?array
 {
-    $sql    = 'SELECT b.*, e.title AS event_title, e.start_date, e.start_time,
-                      e.location, e.price AS unit_price, e.status AS event_status
-               FROM bookings b
-               INNER JOIN events e ON e.id = b.event_id
-               WHERE b.id = :id';
+    $sql = 'SELECT b.*, e.title AS event_title, e.start_date, e.start_time,
+                   e.location, e.price AS unit_price, e.status AS event_status,
+                   u.full_name, u.email
+            FROM bookings b
+            INNER JOIN events e ON e.id = b.event_id
+            INNER JOIN users u ON u.id = b.user_id
+            WHERE b.id = :id';
     $params = ['id' => $bookingId];
+
     if ($userId !== null) {
-        $sql   .= ' AND b.user_id = :uid';
+        $sql .= ' AND b.user_id = :uid';
         $params['uid'] = $userId;
     }
+
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetch() ?: null;
@@ -39,13 +44,12 @@ function get_booking_by_pidx(string $pidx): ?array
     return $stmt->fetch() ?: null;
 }
 
-
-
+/** Fetch all bookings belonging to a participant. */
 function get_user_bookings(int $userId): array
 {
     $stmt = db()->prepare(
         'SELECT b.*, e.title AS event_title, e.start_date, e.start_time,
-                e.location, e.status AS event_status
+                e.location, e.status AS event_status, e.price AS unit_price
          FROM bookings b
          INNER JOIN events e ON e.id = b.event_id
          WHERE b.user_id = :uid
@@ -55,17 +59,20 @@ function get_user_bookings(int $userId): array
     return $stmt->fetchAll();
 }
 
+/** Fetch platform bookings for admin management. */
 function get_all_bookings_admin(?string $statusFilter = null): array
 {
-    $sql    = 'SELECT b.*, u.full_name, u.email, e.title AS event_title, e.start_date, e.start_time
-               FROM bookings b
-               INNER JOIN users u  ON u.id  = b.user_id
-               INNER JOIN events e ON e.id  = b.event_id';
+    $sql = 'SELECT b.*, u.full_name, u.email, e.title AS event_title, e.start_date, e.start_time
+            FROM bookings b
+            INNER JOIN users u  ON u.id  = b.user_id
+            INNER JOIN events e ON e.id  = b.event_id';
     $params = [];
-    if ($statusFilter && in_array($statusFilter, ['Pending','Confirmed','Cancelled'], true)) {
-        $sql   .= ' WHERE b.status = :status';
+
+    if ($statusFilter && in_array($statusFilter, ['Pending','Confirmed','Cancelled','Refunded'], true)) {
+        $sql .= ' WHERE b.status = :status';
         $params['status'] = $statusFilter;
     }
+
     $sql .= ' ORDER BY b.booking_date DESC';
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
@@ -182,7 +189,6 @@ function send_free_booking_email(int $bookingId): void
     );
 }
 
-
 /** Confirm a paid booking after successful Khalti verification and generate QR ticket. */
 function confirm_paid_booking(int $bookingId, string $transactionId, array $payload = []): array
 {
@@ -230,23 +236,24 @@ function confirm_paid_booking(int $bookingId, string $transactionId, array $payl
     }
 }
 
-
-// ── Cancellation (US-006) ────────────────────────────────────────────────────
-// Sprint 1: Cancel and release seat (no refund processing needed for free events)
-
+/** Cancel eligibility rules for confirmed bookings. */
 function is_cancellation_eligible(array $booking): array
 {
     if (!in_array($booking['status'], ['Confirmed'], true)) {
         return [false, 'Only confirmed bookings can be cancelled.'];
     }
+
     $eventTime = strtotime($booking['start_date'] . ' ' . $booking['start_time']);
     $hoursLeft = ($eventTime - time()) / 3600;
-    if ($hoursLeft < 24) {
-        return [false, 'Cancellations are not allowed within 24 hours of the event.'];
+
+    if ((float) $booking['amount'] > 0 && $hoursLeft < 24) {
+        return [false, 'Paid booking cancellations are not allowed within 24 hours of the event.'];
     }
+
     return [true, ''];
 }
 
+/** Cancel a participant booking with owner verification and optional refund. */
 function cancel_booking(int $bookingId, int $userId): array
 {
     $booking = get_booking_by_id($bookingId, $userId);
@@ -260,10 +267,17 @@ function cancel_booking(int $bookingId, int $userId): array
     }
 
     try {
-        db()->prepare("UPDATE bookings SET status='Cancelled', cancelled_at=NOW() WHERE id=:id")
-            ->execute(['id' => $bookingId]);
+        $status = 'Cancelled';
+        if ((float) $booking['amount'] > 0) {
+            $refund = refund_khalti_payment($booking);
+            $status = $refund['ok'] ? 'Refunded' : 'Cancelled';
+        }
+
+        db()->prepare("UPDATE bookings SET status = :status, cancelled_at = NOW() WHERE id = :id")
+            ->execute(['status' => $status, 'id' => $bookingId]);
+
         return [];
-    } catch (\Throwable $e) {
+    } catch (Throwable $e) {
         log_app_error('cancel_booking: ' . $e->getMessage(), __FILE__, __LINE__);
         return ['A system error occurred during cancellation.'];
     }

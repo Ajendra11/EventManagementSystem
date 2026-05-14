@@ -70,10 +70,22 @@ if ($where) {
     $sql .= " WHERE " . implode(" AND ", $where);
 }
 
-$sql .= " ORDER BY created_at DESC";
+$countSql = 'SELECT COUNT(*) FROM users' . ($where ? ' WHERE ' . implode(' AND ', $where) : '');
+$countStmt = $pdo->prepare($countSql);
+$countStmt->execute($params);
+$totalUsers = (int) $countStmt->fetchColumn();
+$page = max(1, (int)($_GET['page'] ?? 1));
+$pager = paginate($totalUsers, $page, 12);
+
+$sql .= " ORDER BY created_at DESC LIMIT :offset, :limit";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+foreach ($params as $key => $value) {
+    $stmt->bindValue(':' . $key, $value);
+}
+$stmt->bindValue(':offset', (int)$pager['offset'], PDO::PARAM_INT);
+$stmt->bindValue(':limit', (int)$pager['limit'], PDO::PARAM_INT);
+$stmt->execute();
 $users = $stmt->fetchAll();
 
 render_admin_header('Manage Users', ['admin-users.css']);

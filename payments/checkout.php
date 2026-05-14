@@ -42,6 +42,9 @@ render_header('Khalti Payment');
             <form method="post" action="<?= APP_URL ?>/payments/callback.php" style="margin-top:1.25rem;">
                 <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                 <input type="hidden" name="pidx" value="<?= e($payment['pidx']) ?>">
+                <input type="hidden" name="status" value="Completed">
+                <input type="hidden" name="purchase_order_id" value="<?= (int)$booking['id'] ?>">
+                <input type="hidden" name="amount" value="<?= (int)round((float)$booking['amount'] * 100) ?>">
                 <button class="btn btn-primary" type="submit">Simulate successful Khalti payment</button>
                 <a class="btn btn-outline" href="<?= APP_URL ?>/payments/cancel.php?booking_id=<?= (int)$booking['id'] ?>">Cancel payment</a>
             </form>

@@ -369,3 +369,436 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   Admin Events Dark Theme Polish
+   Makes dark mode cleaner, softer, less neon/bulky
+========================================================= */
+
+[data-theme="dark"] .admin-events-page {
+  color: var(--foreground, #f4f7fb);
+}
+
+/* Page background area */
+[data-theme="dark"] body.admin-body {
+  background:
+    radial-gradient(circle at top right, rgba(109, 93, 252, 0.12), transparent 34%),
+    var(--background, #0f1115);
+}
+
+/* Page heading */
+[data-theme="dark"] .admin-events-page h1,
+[data-theme="dark"] .admin-events-page h2,
+[data-theme="dark"] .container.section > h2 {
+  color: var(--foreground, #f4f7fb);
+  text-shadow: none;
+}
+
+[data-theme="dark"] .admin-events-page p,
+[data-theme="dark"] .container.section > p {
+  color: var(--muted-foreground, #a9b4c3);
+}
+
+/* Filter/search bar */
+[data-theme="dark"] .admin-events-toolbar,
+[data-theme="dark"] .events-toolbar,
+[data-theme="dark"] .filter-toolbar,
+[data-theme="dark"] form[method="get"] {
+  background: var(--card, #1d212b);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.11));
+  border-radius: 18px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+/* Inputs/selects */
+[data-theme="dark"] .admin-events-page input,
+[data-theme="dark"] .admin-events-page select,
+[data-theme="dark"] .admin-events-page textarea {
+  background: var(--muted, #171a21);
+  color: var(--foreground, #f4f7fb);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  box-shadow: none;
+}
+
+[data-theme="dark"] .admin-events-page input::placeholder {
+  color: var(--muted-foreground, #a9b4c3);
+}
+
+[data-theme="dark"] .admin-events-page input:focus,
+[data-theme="dark"] .admin-events-page select:focus,
+[data-theme="dark"] .admin-events-page textarea:focus {
+  border-color: var(--primary, #a99cff);
+  box-shadow: 0 0 0 3px rgba(169, 156, 255, 0.16);
+}
+
+/* Event cards */
+[data-theme="dark"] .event-admin-card,
+[data-theme="dark"] .admin-event-card,
+[data-theme="dark"] .event-card,
+[data-theme="dark"] .admin-events-page .card,
+[data-theme="dark"] .admin-events-page .panel {
+  background: #1a1f2a;
+  color: var(--foreground, #f4f7fb);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
+}
+
+/* Card hover should be subtle */
+[data-theme="dark"] .event-admin-card:hover,
+[data-theme="dark"] .admin-event-card:hover,
+[data-theme="dark"] .event-card:hover {
+  border-color: rgba(169, 156, 255, 0.28);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Event title/text */
+[data-theme="dark"] .event-admin-card h3,
+[data-theme="dark"] .admin-event-card h3,
+[data-theme="dark"] .event-card h3,
+[data-theme="dark"] .admin-events-page h3 {
+  color: #f7f8ff;
+  text-shadow: none;
+}
+
+[data-theme="dark"] .event-admin-card p,
+[data-theme="dark"] .admin-event-card p,
+[data-theme="dark"] .event-card p,
+[data-theme="dark"] .admin-events-page small,
+[data-theme="dark"] .admin-events-page .muted {
+  color: var(--muted-foreground, #a9b4c3);
+}
+
+/* Icon chips inside event details */
+[data-theme="dark"] .event-meta svg,
+[data-theme="dark"] .event-detail svg,
+[data-theme="dark"] .admin-events-page svg {
+  color: currentColor;
+}
+
+[data-theme="dark"] .event-meta span,
+[data-theme="dark"] .event-detail span,
+[data-theme="dark"] .admin-events-page .meta-item {
+  color: #dbe3f1;
+}
+
+/* Status badges */
+[data-theme="dark"] .badge,
+[data-theme="dark"] .status-badge {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .badge.open,
+[data-theme="dark"] .status-open {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+[data-theme="dark"] .badge.completed,
+[data-theme="dark"] .status-completed {
+  color: #dbe4ff;
+  background: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="dark"] .badge.draft,
+[data-theme="dark"] .status-draft {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.13);
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+/* Buttons */
+[data-theme="dark"] .admin-events-page .btn,
+[data-theme="dark"] .admin-events-page button,
+[data-theme="dark"] .admin-events-page a.btn {
+  box-shadow: none;
+}
+
+[data-theme="dark"] .admin-events-page .btn:not(.btn-danger):not(.danger),
+[data-theme="dark"] .admin-events-page a.btn:not(.btn-danger):not(.danger) {
+  background: #171d28;
+  color: #f4f7fb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .admin-events-page .btn:not(.btn-danger):not(.danger):hover,
+[data-theme="dark"] .admin-events-page a.btn:not(.btn-danger):not(.danger):hover {
+  background: #202738;
+  border-color: rgba(169, 156, 255, 0.28);
+}
+
+/* Create event button */
+[data-theme="dark"] .admin-events-page .btn-primary,
+[data-theme="dark"] .admin-events-page .create-event-btn,
+[data-theme="dark"] .admin-events-page a[href*="events_form"] {
+  color: #12131a;
+  background: var(--primary, #a99cff);
+  border-color: var(--primary, #a99cff);
+  box-shadow: 0 12px 26px rgba(169, 156, 255, 0.18);
+}
+
+[data-theme="dark"] .admin-events-page .btn-primary:hover,
+[data-theme="dark"] .admin-events-page .create-event-btn:hover,
+[data-theme="dark"] .admin-events-page a[href*="events_form"]:hover {
+  box-shadow: 0 14px 30px rgba(169, 156, 255, 0.24);
+}
+
+/* Delete button less harsh but still clear */
+[data-theme="dark"] .admin-events-page .btn-danger,
+[data-theme="dark"] .admin-events-page .danger,
+[data-theme="dark"] .admin-events-page button[name*="delete"],
+[data-theme="dark"] .admin-events-page button[value*="delete"] {
+  color: #fff5f5;
+  background: #e11d48;
+  border-color: #e11d48;
+  box-shadow: 0 12px 24px rgba(225, 29, 72, 0.22);
+}
+
+[data-theme="dark"] .admin-events-page .btn-danger:hover,
+[data-theme="dark"] .admin-events-page .danger:hover {
+  background: #f43f5e;
+  border-color: #f43f5e;
+}
+
+/* Make event card layout more balanced */
+.admin-events-page .event-admin-card,
+.admin-events-page .admin-event-card,
+.admin-events-page .event-card {
+  border-radius: 20px;
+}
+
+.admin-events-page .event-admin-card .btn,
+.admin-events-page .admin-event-card .btn,
+.admin-events-page .event-card .btn {
+  min-height: 42px;
+  border-radius: 14px;
+}
+
+/* Reduce excessive neon/glow in dark mode */
+[data-theme="dark"] .admin-events-page * {
+  text-shadow: none;
+}
+
+/* Slightly calmer purple active sidebar while on events */
+[data-theme="dark"] .admin-nav-item.active {
+  background: rgba(169, 156, 255, 0.14);
+  box-shadow: inset 3px 0 0 var(--primary, #a99cff);
+}
+/* =========================================================
+   Admin Events Dark Theme Polish
+   Makes dark mode cleaner, softer, less neon/bulky
+========================================================= */
+
+[data-theme="dark"] .admin-events-page {
+  color: var(--foreground, #f4f7fb);
+}
+
+/* Page background area */
+[data-theme="dark"] body.admin-body {
+  background:
+    radial-gradient(circle at top right, rgba(109, 93, 252, 0.12), transparent 34%),
+    var(--background, #0f1115);
+}
+
+/* Page heading */
+[data-theme="dark"] .admin-events-page h1,
+[data-theme="dark"] .admin-events-page h2,
+[data-theme="dark"] .container.section > h2 {
+  color: var(--foreground, #f4f7fb);
+  text-shadow: none;
+}
+
+[data-theme="dark"] .admin-events-page p,
+[data-theme="dark"] .container.section > p {
+  color: var(--muted-foreground, #a9b4c3);
+}
+
+/* Filter/search bar */
+[data-theme="dark"] .admin-events-toolbar,
+[data-theme="dark"] .events-toolbar,
+[data-theme="dark"] .filter-toolbar,
+[data-theme="dark"] form[method="get"] {
+  background: var(--card, #1d212b);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.11));
+  border-radius: 18px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+/* Inputs/selects */
+[data-theme="dark"] .admin-events-page input,
+[data-theme="dark"] .admin-events-page select,
+[data-theme="dark"] .admin-events-page textarea {
+  background: var(--muted, #171a21);
+  color: var(--foreground, #f4f7fb);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  box-shadow: none;
+}
+
+[data-theme="dark"] .admin-events-page input::placeholder {
+  color: var(--muted-foreground, #a9b4c3);
+}
+
+[data-theme="dark"] .admin-events-page input:focus,
+[data-theme="dark"] .admin-events-page select:focus,
+[data-theme="dark"] .admin-events-page textarea:focus {
+  border-color: var(--primary, #a99cff);
+  box-shadow: 0 0 0 3px rgba(169, 156, 255, 0.16);
+}
+
+/* Event cards */
+[data-theme="dark"] .event-admin-card,
+[data-theme="dark"] .admin-event-card,
+[data-theme="dark"] .event-card,
+[data-theme="dark"] .admin-events-page .card,
+[data-theme="dark"] .admin-events-page .panel {
+  background: #1a1f2a;
+  color: var(--foreground, #f4f7fb);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24);
+}
+
+/* Card hover should be subtle */
+[data-theme="dark"] .event-admin-card:hover,
+[data-theme="dark"] .admin-event-card:hover,
+[data-theme="dark"] .event-card:hover {
+  border-color: rgba(169, 156, 255, 0.28);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Event title/text */
+[data-theme="dark"] .event-admin-card h3,
+[data-theme="dark"] .admin-event-card h3,
+[data-theme="dark"] .event-card h3,
+[data-theme="dark"] .admin-events-page h3 {
+  color: #f7f8ff;
+  text-shadow: none;
+}
+
+[data-theme="dark"] .event-admin-card p,
+[data-theme="dark"] .admin-event-card p,
+[data-theme="dark"] .event-card p,
+[data-theme="dark"] .admin-events-page small,
+[data-theme="dark"] .admin-events-page .muted {
+  color: var(--muted-foreground, #a9b4c3);
+}
+
+/* Icon chips inside event details */
+[data-theme="dark"] .event-meta svg,
+[data-theme="dark"] .event-detail svg,
+[data-theme="dark"] .admin-events-page svg {
+  color: currentColor;
+}
+
+[data-theme="dark"] .event-meta span,
+[data-theme="dark"] .event-detail span,
+[data-theme="dark"] .admin-events-page .meta-item {
+  color: #dbe3f1;
+}
+
+/* Status badges */
+[data-theme="dark"] .badge,
+[data-theme="dark"] .status-badge {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .badge.open,
+[data-theme="dark"] .status-open {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+[data-theme="dark"] .badge.completed,
+[data-theme="dark"] .status-completed {
+  color: #dbe4ff;
+  background: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+[data-theme="dark"] .badge.draft,
+[data-theme="dark"] .status-draft {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.13);
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+/* Buttons */
+[data-theme="dark"] .admin-events-page .btn,
+[data-theme="dark"] .admin-events-page button,
+[data-theme="dark"] .admin-events-page a.btn {
+  box-shadow: none;
+}
+
+[data-theme="dark"] .admin-events-page .btn:not(.btn-danger):not(.danger),
+[data-theme="dark"] .admin-events-page a.btn:not(.btn-danger):not(.danger) {
+  background: #171d28;
+  color: #f4f7fb;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .admin-events-page .btn:not(.btn-danger):not(.danger):hover,
+[data-theme="dark"] .admin-events-page a.btn:not(.btn-danger):not(.danger):hover {
+  background: #202738;
+  border-color: rgba(169, 156, 255, 0.28);
+}
+
+/* Create event button */
+[data-theme="dark"] .admin-events-page .btn-primary,
+[data-theme="dark"] .admin-events-page .create-event-btn,
+[data-theme="dark"] .admin-events-page a[href*="events_form"] {
+  color: #12131a;
+  background: var(--primary, #a99cff);
+  border-color: var(--primary, #a99cff);
+  box-shadow: 0 12px 26px rgba(169, 156, 255, 0.18);
+}
+
+[data-theme="dark"] .admin-events-page .btn-primary:hover,
+[data-theme="dark"] .admin-events-page .create-event-btn:hover,
+[data-theme="dark"] .admin-events-page a[href*="events_form"]:hover {
+  box-shadow: 0 14px 30px rgba(169, 156, 255, 0.24);
+}
+
+/* Delete button less harsh but still clear */
+[data-theme="dark"] .admin-events-page .btn-danger,
+[data-theme="dark"] .admin-events-page .danger,
+[data-theme="dark"] .admin-events-page button[name*="delete"],
+[data-theme="dark"] .admin-events-page button[value*="delete"] {
+  color: #fff5f5;
+  background: #e11d48;
+  border-color: #e11d48;
+  box-shadow: 0 12px 24px rgba(225, 29, 72, 0.22);
+}
+
+[data-theme="dark"] .admin-events-page .btn-danger:hover,
+[data-theme="dark"] .admin-events-page .danger:hover {
+  background: #f43f5e;
+  border-color: #f43f5e;
+}
+
+/* Make event card layout more balanced */
+.admin-events-page .event-admin-card,
+.admin-events-page .admin-event-card,
+.admin-events-page .event-card {
+  border-radius: 20px;
+}
+
+.admin-events-page .event-admin-card .btn,
+.admin-events-page .admin-event-card .btn,
+.admin-events-page .event-card .btn {
+  min-height: 42px;
+  border-radius: 14px;
+}
+
+/* Reduce excessive neon/glow in dark mode */
+[data-theme="dark"] .admin-events-page * {
+  text-shadow: none;
+}
+
+/* Slightly calmer purple active sidebar while on events */
+[data-theme="dark"] .admin-nav-item.active {
+  background: rgba(169, 156, 255, 0.14);
+  box-shadow: inset 3px 0 0 var(--primary, #a99cff);
+}

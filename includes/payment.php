@@ -1,5 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
+require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/mail.php';
+
 /** Record a Khalti/payment lifecycle event for admin/audit tracking. */
 function log_payment_event(?int $bookingId, string $event, float $amount, string $status, array $payload = []): void
 {
@@ -35,7 +40,6 @@ function khalti_authorization_header(): string
 
     return 'Authorization: Key ' . $secret;
 }
-
 
 /** Make a JSON Khalti ePayment API request. */
 function khalti_api_request(string $endpoint, array $payload, int $maxAttempts = 3): array

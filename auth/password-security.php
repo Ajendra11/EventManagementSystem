@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/layout.php';
@@ -56,7 +57,8 @@ render_header('Password & Security');
 
                 <div class="pm-settings-field">
                     <label for="current_password">Current password</label>
-                    <div class="pm-password-row">
+
+                    <div class="password-wrap pm-password-row">
                         <input
                             id="current_password"
                             type="password"
@@ -66,13 +68,25 @@ render_header('Password & Security');
                             autocomplete="current-password"
                             placeholder="Enter your current password"
                         >
-                        <button type="button" class="pm-toggle-pass" data-target="current_password">Show</button>
+
+                        <button
+                            class="eye-btn"
+                            type="button"
+                            data-target="current_password"
+                            aria-label="Show current password"
+                        >
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
                 <div class="pm-settings-field">
                     <label for="new_password">New password</label>
-                    <div class="pm-password-row">
+
+                    <div class="password-wrap pm-password-row">
                         <input
                             id="new_password"
                             type="password"
@@ -82,13 +96,25 @@ render_header('Password & Security');
                             autocomplete="new-password"
                             placeholder="Enter a new password"
                         >
-                        <button type="button" class="pm-toggle-pass" data-target="new_password">Show</button>
+
+                        <button
+                            class="eye-btn"
+                            type="button"
+                            data-target="new_password"
+                            aria-label="Show new password"
+                        >
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
                 <div class="pm-settings-field">
                     <label for="confirm_new_password">Confirm new password</label>
-                    <div class="pm-password-row">
+
+                    <div class="password-wrap pm-password-row">
                         <input
                             id="confirm_new_password"
                             type="password"
@@ -98,7 +124,18 @@ render_header('Password & Security');
                             autocomplete="new-password"
                             placeholder="Re-enter your new password"
                         >
-                        <button type="button" class="pm-toggle-pass" data-target="confirm_new_password">Show</button>
+
+                        <button
+                            class="eye-btn"
+                            type="button"
+                            data-target="confirm_new_password"
+                            aria-label="Show confirm new password"
+                        >
+                            <svg viewBox="0 0 24 24">
+                                <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -112,22 +149,67 @@ render_header('Password & Security');
                 </div>
 
                 <div class="pm-settings-actions">
-                    <button class="btn btn-primary" type="submit">Save changes</button>
+                    <button class="btn btn-primary" type="submit">
+                        Save changes
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<style>
+.password-wrap,
+.pm-password-row {
+    position: relative;
+}
+
+.password-wrap input,
+.pm-password-row input {
+    width: 100%;
+    padding-right: 56px;
+}
+
+.eye-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #746f9a;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.eye-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.eye-btn:hover {
+    color: #7c3aed;
+}
+</style>
+
 <script>
-document.querySelectorAll('.pm-toggle-pass').forEach(function (button) {
+document.querySelectorAll('.eye-btn').forEach(function (button) {
     button.addEventListener('click', function () {
         const input = document.getElementById(this.dataset.target);
-        if (!input) return;
 
-        const isHidden = input.type === 'password';
-        input.type = isHidden ? 'text' : 'password';
-        this.textContent = isHidden ? 'Hide' : 'Show';
+        if (!input) {
+            return;
+        }
+
+        input.type = input.type === 'password' ? 'text' : 'password';
     });
 });
 </script>

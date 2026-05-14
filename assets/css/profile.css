@@ -1,860 +1,557 @@
-@import url("./base-core.css");
+/* =========================================================
+   EventHub - Profile Delete Account Final Fix
+   ---------------------------------------------------------
+   What this section fixes:
+   1. The delete account item in the left sidebar profile menu.
+   2. The delete account card on auth/profile.php.
+   3. The delete account confirmation page.
+   
+   Important:
+   - CSS only.
+   - No PHP changes.
+   - Safe for user side only.
+   - Admin pages are protected by body:not(.admin-body).
+========================================================= */
 
-/* =========================
-   PROFILE MAIN PAGE
-   ========================= */
 
-.pm-shell {
-  max-width: 980px;
-  margin: 0 auto;
+/* =========================================================
+   1) LEFT SIDEBAR PROFILE MENU
+   ---------------------------------------------------------
+   This is the small dropdown/menu visible in your screenshot.
+   It contains:
+   - Profile details
+   - Password & Security
+   - Delete Account
+   - Logout
+   
+   The ugly part was happening because the menu items were too
+   cramped and the delete text looked like raw red text.
+========================================================= */
+
+/* Make the whole sidebar profile menu feel like one clean card */
+body:not(.admin-body) .user-shell-profile-menu {
+  padding: 10px !important;
+  background: var(--card, #ffffff) !important;
+  border: 1px solid var(--border, #d8dee8) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08) !important;
 }
 
-.pm-card {
-  overflow: hidden;
-  padding: 0;
-  border-radius: 30px;
-  box-shadow: var(--shadow-lg);
+/* Profile/user info block at the top of the menu */
+body:not(.admin-body) .user-profile-menu-head {
+  margin-bottom: 8px !important;
+  padding: 10px !important;
+  background: color-mix(in srgb, var(--primary, #6d5dfc) 5%, var(--card, #ffffff)) !important;
+  border: 1px solid color-mix(in srgb, var(--primary, #6d5dfc) 16%, var(--border, #d8dee8)) !important;
+  border-radius: 15px !important;
 }
 
-.pm-hero {
-  position: relative;
-  min-height: 360px;
-  overflow: hidden;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+/* Every menu link becomes a proper row, not cramped two-column text */
+body:not(.admin-body) .user-shell-profile-menu a {
+  position: relative !important;
+  min-height: 58px !important;
+  padding: 12px 13px !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  align-content: center !important;
+  gap: 4px !important;
+  overflow: hidden !important;
+  color: var(--foreground, #111827) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 14px !important;
+  text-decoration: none !important;
+  transform: none !important;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease !important;
 }
 
-.pm-hero-media {
-  position: absolute;
-  inset: 0;
+/* Normal hover state for menu links */
+body:not(.admin-body) .user-shell-profile-menu a:hover {
+  transform: translateX(2px) !important;
+  background: color-mix(in srgb, var(--primary, #6d5dfc) 6%, transparent) !important;
+  border-color: color-mix(in srgb, var(--primary, #6d5dfc) 14%, var(--border, #d8dee8)) !important;
 }
 
-.pm-hero-media video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(1.05) contrast(1.04) brightness(.72);
+/* Main title text inside each menu item */
+body:not(.admin-body) .user-shell-profile-menu a span {
+  color: inherit !important;
+  font-size: 0.86rem !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.015em !important;
 }
 
-.pm-hero-overlay {
-  position: absolute;
-  inset: 0;
+/* Description text inside each menu item */
+body:not(.admin-body) .user-shell-profile-menu a small {
+  color: var(--muted-foreground, #64748b) !important;
+  font-size: 0.72rem !important;
+  line-height: 1.35 !important;
+  font-weight: 650 !important;
+}
+
+
+/* =========================================================
+   2) DELETE ACCOUNT ITEM INSIDE SIDEBAR MENU
+   ---------------------------------------------------------
+   This specifically targets:
+   .user-shell-profile-menu a.danger
+   
+   Goal:
+   - Still clearly dangerous.
+   - Softer, cleaner, more intentional.
+   - Not an ugly bright-red text block.
+========================================================= */
+
+body:not(.admin-body) .user-shell-profile-menu a.danger {
+  padding-left: 15px !important;
+  color: #991b1b !important;
   background:
-    linear-gradient(180deg, rgba(5,10,22,.18) 0%, rgba(6,10,20,.62) 56%, rgba(7,10,19,.94) 100%),
-    radial-gradient(circle at 20% 20%, rgba(139,92,246,.28), transparent 30%),
-    radial-gradient(circle at 80% 22%, rgba(34,211,238,.16), transparent 24%);
+    linear-gradient(135deg, rgba(254, 242, 242, 0.92), rgba(255, 247, 247, 0.88)) !important;
+  border-color: rgba(248, 113, 113, 0.22) !important;
 }
 
-.pm-hero-content {
-  position: relative;
-  z-index: 2;
-  min-height: 360px;
-  padding: 34px;
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-}
-
-.pm-avatar {
-  width: 104px;
-  height: 104px;
-  flex: 0 0 104px;
-  border-radius: 28px;
-  display: grid;
-  place-items: center;
-  font-size: 2.4rem;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow:
-    0 20px 40px rgba(139,92,246,.30),
-    inset 0 1px 0 rgba(255,255,255,.16);
-}
-
-.pm-user-meta {
-  max-width: 700px;
-}
-
-.pm-user-meta h1 {
-  margin: 12px 0 8px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.04;
-  letter-spacing: -.04em;
-  color: #fff;
-}
-
-.pm-subtitle {
-  margin: 0;
-  color: rgba(255,255,255,.82);
-  font-size: 1rem;
-  max-width: 58ch;
-}
-
-.pm-user-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.pm-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 14px;
+/* Small red accent strip on the left side */
+body:not(.admin-body) .user-shell-profile-menu a.danger::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 11px;
+  bottom: 11px;
+  width: 4px;
   border-radius: 999px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.10);
-  color: #eef2ff;
-  font-size: .92rem;
-  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, #fb7185, #dc2626);
 }
 
-.pm-body {
-  padding: 30px;
-}
-
-.pm-section-head {
-  margin-bottom: 20px;
-}
-
-.pm-section-head h2 {
-  margin: 0 0 6px;
-  font-size: 1.5rem;
-  letter-spacing: -.03em;
-  color: #fff;
-}
-
-.pm-section-head p {
-  margin: 0;
-  color: var(--text-soft);
-}
-
-.pm-menu {
-  display: grid;
-  gap: 14px;
-}
-
-.pm-menu-item {
-  position: relative;
-  display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 16px;
-  padding: 18px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  border: 1px solid rgba(255,255,255,.11);
-  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
-  overflow: hidden;
-}
-
-.pm-menu-item::before {
-  content: "";
+/* Small warning dot on the right side */
+body:not(.admin-body) .user-shell-profile-menu a.danger::after {
+  content: "!";
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at top right, rgba(139,92,246,.14), transparent 28%),
-    linear-gradient(90deg, rgba(255,255,255,.03), transparent 55%);
-  opacity: 0;
-  transition: opacity .22s ease;
-  pointer-events: none;
-}
-
-.pm-menu-item:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255,255,255,.18);
-  box-shadow: 0 18px 30px rgba(0,0,0,.22);
-}
-
-.pm-menu-item:hover::before {
-  opacity: 1;
-}
-
-.pm-menu-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
+  right: 12px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
   display: grid;
   place-items: center;
-  background: rgba(139,92,246,.12);
-  border: 1px solid rgba(139,92,246,.22);
-  color: #e9dbff;
+  color: #b91c1c;
+  background: rgba(248, 113, 113, 0.13);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 950;
+  transform: translateY(-50%);
 }
 
-.pm-menu-icon svg {
-  width: 24px;
-  height: 24px;
+/* Leave room for the warning dot */
+body:not(.admin-body) .user-shell-profile-menu a.danger span,
+body:not(.admin-body) .user-shell-profile-menu a.danger small {
+  padding-right: 34px !important;
 }
 
-.pm-menu-content {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* Delete title */
+body:not(.admin-body) .user-shell-profile-menu a.danger span {
+  color: #991b1b !important;
 }
 
-.pm-menu-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #fff;
+/* Delete description */
+body:not(.admin-body) .user-shell-profile-menu a.danger small {
+  color: #9f5050 !important;
 }
 
-.pm-menu-desc {
-  font-size: .92rem;
-  color: var(--text-soft);
-  line-height: 1.55;
-}
-
-.pm-menu-arrow {
-  font-size: 2rem;
-  line-height: 1;
-  color: rgba(255,255,255,.72);
-  transition: transform .22s ease, color .22s ease;
-}
-
-.pm-menu-item:hover .pm-menu-arrow {
-  transform: translateX(4px);
-  color: #fff;
-}
-
-.pm-menu-item.danger .pm-menu-icon {
-  background: rgba(251,113,133,.12);
-  border-color: rgba(251,113,133,.22);
-  color: #ffd2da;
-}
-
-.pm-menu-item.logout .pm-menu-icon {
-  background: rgba(96,165,250,.12);
-  border-color: rgba(96,165,250,.22);
-  color: #d7e7ff;
-}
-
-/* =========================
-   INNER SETTINGS PAGES
-   manage-profile.php
-   password-security.php
-   delete-account.php
-   ========================= */
-
-.page-auth-manage-profile-php .section,
-.page-auth-password-security-php .section,
-.page-auth-delete-account-php .section {
-  position: relative;
-  padding-top: 42px;
-  padding-bottom: 56px;
-}
-
-.page-auth-manage-profile-php .section::before,
-.page-auth-password-security-php .section::before,
-.page-auth-delete-account-php .section::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+/* Delete hover state */
+body:not(.admin-body) .user-shell-profile-menu a.danger:hover {
+  transform: translateX(2px) !important;
+  color: #7f1d1d !important;
   background:
-    radial-gradient(circle at 10% 10%, rgba(139,92,246,.16), transparent 30%),
-    radial-gradient(circle at 90% 14%, rgba(34,211,238,.10), transparent 26%);
+    linear-gradient(135deg, rgba(255, 241, 242, 1), rgba(255, 255, 255, 0.96)) !important;
+  border-color: rgba(220, 38, 38, 0.34) !important;
+  box-shadow: 0 12px 26px rgba(185, 28, 28, 0.08) !important;
 }
 
-.page-auth-manage-profile-php .container,
-.page-auth-password-security-php .container,
-.page-auth-delete-account-php .container {
-  position: relative;
-  z-index: 1;
-}
-
-.page-auth-manage-profile-php .panel,
-.page-auth-password-security-php .panel,
-.page-auth-delete-account-php .panel {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 36px;
-  border-radius: 30px;
-  background:
-    linear-gradient(180deg, rgba(6,12,28,.94), rgba(4,10,24,.92));
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow:
-    0 28px 60px rgba(0,0,0,.38),
-    inset 0 1px 0 rgba(255,255,255,.04);
-  overflow: hidden;
-  position: relative;
-}
-
-.page-auth-manage-profile-php .panel::before,
-.page-auth-password-security-php .panel::before,
-.page-auth-delete-account-php .panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at top right, rgba(139,92,246,.12), transparent 30%),
-    radial-gradient(circle at bottom left, rgba(34,211,238,.08), transparent 24%);
-}
-
-.page-auth-manage-profile-php .panel > *,
-.page-auth-password-security-php .panel > *,
-.page-auth-delete-account-php .panel > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* headings */
-.page-auth-manage-profile-php h1,
-.page-auth-manage-profile-php h2,
-.page-auth-password-security-php h1,
-.page-auth-password-security-php h2,
-.page-auth-delete-account-php h1,
-.page-auth-delete-account-php h2 {
-  margin: 0 0 10px;
-  color: #fff;
-  font-size: clamp(2rem, 3vw, 3rem);
-  line-height: 1.05;
-  letter-spacing: -.04em;
-}
-
-.page-auth-manage-profile-php p,
-.page-auth-password-security-php p,
-.page-auth-delete-account-php p {
-  color: rgba(255,255,255,.76);
-  font-size: 1rem;
-  line-height: 1.7;
-}
-
-/* back link */
-.page-auth-manage-profile-php a[href*="profile.php"]:not(.btn):not(.button),
-.page-auth-password-security-php a[href*="profile.php"]:not(.btn):not(.button),
-.page-auth-delete-account-php a[href*="profile.php"]:not(.btn):not(.button) {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 26px;
-  padding: 12px 18px;
-  border-radius: 14px;
-  text-decoration: none;
-  color: #fff;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow: 0 12px 22px rgba(0,0,0,.16);
-  transition: transform .2s ease, border-color .2s ease, background .2s ease;
-}
-
-.page-auth-manage-profile-php a[href*="profile.php"]:not(.btn):not(.button):hover,
-.page-auth-password-security-php a[href*="profile.php"]:not(.btn):not(.button):hover,
-.page-auth-delete-account-php a[href*="profile.php"]:not(.btn):not(.button):hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,.22);
-  background: rgba(255,255,255,.09);
-}
-
-/* labels */
-.page-auth-manage-profile-php label,
-.page-auth-password-security-php label,
-.page-auth-delete-account-php label {
-  display: block;
-  margin-bottom: 10px;
-  color: #f3f4f6;
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: -.01em;
-}
-
-/* inputs */
-.page-auth-manage-profile-php input[type="text"],
-.page-auth-manage-profile-php input[type="email"],
-.page-auth-manage-profile-php input[type="password"],
-.page-auth-manage-profile-php textarea,
-.page-auth-password-security-php input[type="text"],
-.page-auth-password-security-php input[type="email"],
-.page-auth-password-security-php input[type="password"],
-.page-auth-password-security-php textarea,
-.page-auth-delete-account-php input[type="text"],
-.page-auth-delete-account-php input[type="email"],
-.page-auth-delete-account-php input[type="password"],
-.page-auth-delete-account-php textarea {
-  width: 100%;
-  min-height: 58px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(3,8,22,.88);
-  color: #fff;
-  font-size: 1.04rem;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.03),
-    0 10px 24px rgba(0,0,0,.14);
-  transition: border-color .22s ease, box-shadow .22s ease, background .22s ease, transform .22s ease;
-  appearance: none;
-}
-
-.page-auth-manage-profile-php textarea,
-.page-auth-password-security-php textarea,
-.page-auth-delete-account-php textarea {
-  min-height: 130px;
-  resize: vertical;
-}
-
-.page-auth-manage-profile-php input::placeholder,
-.page-auth-manage-profile-php textarea::placeholder,
-.page-auth-password-security-php input::placeholder,
-.page-auth-password-security-php textarea::placeholder,
-.page-auth-delete-account-php input::placeholder,
-.page-auth-delete-account-php textarea::placeholder {
-  color: rgba(255,255,255,.34);
-}
-
-.page-auth-manage-profile-php input:focus,
-.page-auth-manage-profile-php textarea:focus,
-.page-auth-password-security-php input:focus,
-.page-auth-password-security-php textarea:focus,
-.page-auth-delete-account-php input:focus,
-.page-auth-delete-account-php textarea:focus {
-  outline: none;
-  border-color: rgba(139,92,246,.62);
-  background: rgba(6,12,28,.96);
-  box-shadow:
-    0 0 0 4px rgba(139,92,246,.16),
-    0 16px 30px rgba(0,0,0,.18);
-  transform: translateY(-1px);
-}
-
-/* form spacing */
-.page-auth-manage-profile-php form,
-.page-auth-password-security-php form,
-.page-auth-delete-account-php form {
-  margin-top: 24px;
-}
-
-.page-auth-manage-profile-php form > * + *,
-.page-auth-password-security-php form > * + *,
-.page-auth-delete-account-php form > * + * {
-  margin-top: 18px;
-}
-
-/* buttons */
-.page-auth-manage-profile-php button,
-.page-auth-manage-profile-php input[type="submit"],
-.page-auth-password-security-php button,
-.page-auth-password-security-php input[type="submit"],
-.page-auth-delete-account-php button,
-.page-auth-delete-account-php input[type="submit"] {
-  appearance: none;
-  border: 0;
-  min-height: 52px;
-  padding: 0 22px;
-  border-radius: 16px;
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: -.01em;
-  cursor: pointer;
-  color: #fff;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  box-shadow:
-    0 18px 30px rgba(139,92,246,.24),
-    inset 0 1px 0 rgba(255,255,255,.18);
-  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
-}
-
-.page-auth-manage-profile-php button:hover,
-.page-auth-manage-profile-php input[type="submit"]:hover,
-.page-auth-password-security-php button:hover,
-.page-auth-password-security-php input[type="submit"]:hover,
-.page-auth-delete-account-php button:hover,
-.page-auth-delete-account-php input[type="submit"]:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 22px 34px rgba(139,92,246,.30),
-    inset 0 1px 0 rgba(255,255,255,.18);
-  filter: brightness(1.03);
-}
-
-/* danger button support */
-.page-auth-delete-account-php button,
-.page-auth-delete-account-php input[type="submit"] {
-  background: linear-gradient(135deg, #fb7185, #ef4444);
-  box-shadow:
-    0 18px 30px rgba(239,68,68,.24),
-    inset 0 1px 0 rgba(255,255,255,.16);
-}
-
-/* alerts / notes */
-.page-auth-manage-profile-php .flash,
-.page-auth-password-security-php .flash,
-.page-auth-delete-account-php .flash {
-  margin-bottom: 18px;
-  border-radius: 16px;
-}
-
-/* =========================
-   RESPONSIVE
-   ========================= */
-
-@media (max-width: 768px) {
-  .pm-hero {
-    min-height: auto;
-  }
-
-  .pm-hero-content {
-    min-height: auto;
-    padding: 24px;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-end;
-  }
-
-  .pm-avatar {
-    width: 82px;
-    height: 82px;
-    font-size: 2rem;
-    border-radius: 22px;
-  }
-
-  .pm-body {
-    padding: 22px;
-  }
-
-  .pm-menu-item {
-    grid-template-columns: 52px minmax(0, 1fr) auto;
-    padding: 16px;
-    gap: 14px;
-  }
-
-  .pm-menu-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-  }
-
-  .pm-menu-desc {
-    font-size: .88rem;
-  }
-
-  .page-auth-manage-profile-php .panel,
-  .page-auth-password-security-php .panel,
-  .page-auth-delete-account-php .panel {
-    padding: 24px;
-    border-radius: 24px;
-  }
-
-  .page-auth-manage-profile-php h1,
-  .page-auth-manage-profile-php h2,
-  .page-auth-password-security-php h1,
-  .page-auth-password-security-php h2,
-  .page-auth-delete-account-php h1,
-  .page-auth-delete-account-php h2 {
-    font-size: clamp(1.8rem, 7vw, 2.4rem);
-  }
-}
-
-@media (max-width: 520px) {
-  .pm-user-meta h1 {
-    font-size: 1.8rem;
-  }
-
-  .pm-menu-item {
-    grid-template-columns: 1fr;
-  }
-
-  .pm-menu-arrow {
-    display: none;
-  }
-
-  .pm-menu-icon {
-    margin-bottom: 2px;
-  }
-
-  .page-auth-manage-profile-php a[href*="profile.php"]:not(.btn):not(.button),
-  .page-auth-password-security-php a[href*="profile.php"]:not(.btn):not(.button),
-  .page-auth-delete-account-php a[href*="profile.php"]:not(.btn):not(.button),
-  .page-auth-manage-profile-php button,
-  .page-auth-manage-profile-php input[type="submit"],
-  .page-auth-password-security-php button,
-  .page-auth-password-security-php input[type="submit"],
-  .page-auth-delete-account-php button,
-  .page-auth-delete-account-php input[type="submit"] {
-    width: 100%;
-    justify-content: center;
-  }
-}
-/* =========================================================
-   COMPACT SETTINGS PAGES
-   Used for:
-   - manage-profile.php
-   - password-security.php
-   - delete-account.php
-========================================================= */
-
-.pm-settings-shell {
-  max-width: 760px;
-  margin: 0;
-}
-
-.pm-inline-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  font-size: 0.96rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.88);
-  transition: opacity .18s ease, transform .18s ease;
-}
-
-.pm-inline-back:hover {
-  opacity: 1;
-  transform: translateX(-1px);
-}
-
-.pm-settings-card {
-  padding: 28px;
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(16,22,40,.82), rgba(10,15,28,.92));
-  border: 1px solid rgba(255,255,255,.07);
-  box-shadow: 0 18px 50px rgba(0,0,0,.22);
-}
-
-.pm-settings-head {
-  margin-bottom: 22px;
-}
-
-.pm-settings-title {
-  margin: 0 0 8px;
-  font-size: clamp(2rem, 4vw, 2.6rem);
-  line-height: 1.1;
-  color: #f8fafc;
-}
-
-.pm-settings-subtitle {
-  margin: 0;
-  max-width: 560px;
-  color: rgba(226,232,240,.84);
-  font-size: 1rem;
-  line-height: 1.65;
-}
-
-.pm-settings-errors {
-  margin-bottom: 16px;
-}
-
-.pm-settings-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.pm-settings-field label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.pm-settings-field input,
-.pm-settings-field textarea,
-.pm-settings-field select {
-  width: 100%;
-}
-
-.pm-settings-help {
-  margin: 10px 0 0;
-  font-size: 0.94rem;
-  color: rgba(203,213,225,.76);
-}
-
-.pm-settings-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 4px;
-}
-
-.pm-settings-actions .btn {
-  min-width: 160px;
-}
-
-/* Small refinement for settings pages on smaller screens */
-@media (max-width: 768px) {
-  .pm-settings-shell {
-    max-width: 100%;
-  }
-
-  .pm-settings-card {
-    padding: 22px;
-    border-radius: 20px;
-  }
-
-  .pm-settings-title {
-    font-size: 2rem;
-  }
-}
 
 /* =========================================================
-   PASSWORD & SECURITY
+   3) LOGOUT ITEM CLEANUP
+   ---------------------------------------------------------
+   Keeps logout separate from delete account.
+   Delete = danger.
+   Logout = normal account action.
 ========================================================= */
 
-.pm-password-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+body:not(.admin-body) .user-shell-profile-menu a.logout {
+  margin-top: 8px !important;
+  padding-top: 13px !important;
+  color: var(--primary, #6d5dfc) !important;
+  background: transparent !important;
+  border-top: 1px solid var(--border, #d8dee8) !important;
+  border-radius: 0 0 14px 14px !important;
 }
 
-.pm-password-row input {
-  flex: 1;
-  min-width: 0;
+body:not(.admin-body) .user-shell-profile-menu a.logout:hover {
+  background: color-mix(in srgb, var(--primary, #6d5dfc) 7%, transparent) !important;
 }
 
-.pm-toggle-pass {
-  flex-shrink: 0;
-  min-width: 82px;
-  height: 46px;
-  padding: 0 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 12px;
-  background: rgba(255,255,255,.04);
-  color: #e5e7eb;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .18s ease;
+
+/* =========================================================
+   4) MAIN PROFILE PAGE DELETE CARD
+   ---------------------------------------------------------
+   This targets the bigger profile page card:
+   <a class="profile-action-item danger" href="...delete-account.php">
+   
+   Keep this because your auth/profile.php has this exact markup.
+========================================================= */
+
+body:not(.admin-body) .profile-actions-list {
+  display: grid !important;
+  gap: 12px !important;
 }
 
-.pm-toggle-pass:hover {
-  background: rgba(255,255,255,.08);
-  border-color: rgba(255,255,255,.16);
+body:not(.admin-body) .profile-action-item {
+  position: relative !important;
+  min-height: 76px !important;
+  padding: 16px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  overflow: hidden !important;
+  color: var(--foreground, #111827) !important;
+  background: color-mix(in srgb, var(--card, #ffffff) 84%, var(--background, #f8fafc)) !important;
+  border: 1px solid var(--border, #e5e7eb) !important;
+  border-radius: 20px !important;
+  text-decoration: none !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045) !important;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease !important;
 }
+
+body:not(.admin-body) .profile-action-item:hover {
+  transform: translateY(-2px) !important;
+  border-color: color-mix(in srgb, var(--primary, #7c3aed) 26%, var(--border, #e5e7eb)) !important;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.075) !important;
+}
+
+body:not(.admin-body) .profile-action-item strong {
+  display: block !important;
+  margin-bottom: 4px !important;
+  color: var(--foreground, #111827) !important;
+  font-size: 0.98rem !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+}
+
+body:not(.admin-body) .profile-action-item span:not(.profile-action-arrow) {
+  display: block !important;
+  color: var(--muted-foreground, #64748b) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.4 !important;
+  font-weight: 600 !important;
+}
+
+body:not(.admin-body) .profile-action-arrow {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 34px !important;
+  color: var(--muted-foreground, #64748b) !important;
+  background: color-mix(in srgb, var(--foreground, #111827) 5%, transparent) !important;
+  border-radius: 999px !important;
+  font-size: 1.35rem !important;
+  line-height: 1 !important;
+  transition:
+    transform 180ms ease,
+    color 180ms ease,
+    background 180ms ease !important;
+}
+
+body:not(.admin-body) .profile-action-item:hover .profile-action-arrow {
+  transform: translateX(2px) !important;
+  color: var(--primary, #7c3aed) !important;
+  background: color-mix(in srgb, var(--primary, #7c3aed) 12%, transparent) !important;
+}
+
+
+/* Main profile page delete card */
+body:not(.admin-body) .profile-action-item.danger,
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] {
+  color: #991b1b !important;
+  background:
+    linear-gradient(135deg, rgba(254, 242, 242, 0.96), rgba(255, 247, 247, 0.92)),
+    var(--card, #ffffff) !important;
+  border-color: rgba(248, 113, 113, 0.28) !important;
+  box-shadow: 0 12px 28px rgba(185, 28, 28, 0.055) !important;
+}
+
+/* Main delete card left accent */
+body:not(.admin-body) .profile-action-item.danger::before,
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, #fb7185, #dc2626);
+}
+
+/* Main delete card warning badge */
+body:not(.admin-body) .profile-action-item.danger::after,
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"]::after {
+  content: "!";
+  position: absolute;
+  right: 58px;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: #b91c1c;
+  background: rgba(248, 113, 113, 0.13);
+  border: 1px solid rgba(248, 113, 113, 0.24);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 950;
+  transform: translateY(-50%);
+}
+
+body:not(.admin-body) .profile-action-item.danger strong,
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] strong {
+  color: #991b1b !important;
+}
+
+body:not(.admin-body) .profile-action-item.danger span:not(.profile-action-arrow),
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] span:not(.profile-action-arrow) {
+  color: #9f5050 !important;
+}
+
+body:not(.admin-body) .profile-action-item.danger .profile-action-arrow,
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] .profile-action-arrow {
+  color: #b91c1c !important;
+  background: rgba(248, 113, 113, 0.13) !important;
+}
+
+body:not(.admin-body) .profile-action-item.danger:hover,
+body:not(.admin-body) a.profile-action-item[href*="delete-account.php"]:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 241, 242, 1), rgba(255, 255, 255, 0.96)),
+    var(--card, #ffffff) !important;
+  border-color: rgba(220, 38, 38, 0.36) !important;
+  box-shadow: 0 18px 42px rgba(185, 28, 28, 0.10) !important;
+}
+
+
+/* =========================================================
+   5) DELETE ACCOUNT CONFIRMATION PAGE
+   ---------------------------------------------------------
+   This improves the actual delete confirmation page.
+   It targets common page classes and the delete-account URL body
+   class pattern used in your current CSS.
+========================================================= */
+
+body:not(.admin-body)[class*="auth-delete-account"] .panel,
+body:not(.admin-body)[class*="auth-delete-account"] .card,
+body:not(.admin-body).page-auth-delete-account-php .panel,
+body:not(.admin-body) .delete-account-page .panel,
+body:not(.admin-body) .account-delete-page .panel {
+  max-width: 720px !important;
+  margin-inline: auto !important;
+  border-color: rgba(248, 113, 113, 0.24) !important;
+  box-shadow: 0 22px 60px rgba(185, 28, 28, 0.08) !important;
+}
+
+/* Delete page heading */
+body:not(.admin-body)[class*="auth-delete-account"] h1,
+body:not(.admin-body)[class*="auth-delete-account"] h2,
+body:not(.admin-body).page-auth-delete-account-php h1,
+body:not(.admin-body) .delete-account-page h1,
+body:not(.admin-body) .account-delete-page h1 {
+  color: #991b1b !important;
+}
+
+/* Delete page warning box, if your page uses any of these classes */
+body:not(.admin-body)[class*="auth-delete-account"] .alert,
+body:not(.admin-body)[class*="auth-delete-account"] .warning-box,
+body:not(.admin-body)[class*="auth-delete-account"] .delete-warning,
+body:not(.admin-body)[class*="auth-delete-account"] .danger-zone,
+body:not(.admin-body) .delete-account-page .alert,
+body:not(.admin-body) .account-delete-page .alert {
+  padding: 16px 18px !important;
+  color: #991b1b !important;
+  background: rgba(254, 242, 242, 0.94) !important;
+  border: 1px solid rgba(248, 113, 113, 0.26) !important;
+  border-radius: 16px !important;
+  line-height: 1.55 !important;
+}
+
+/* Final destructive button */
+body:not(.admin-body)[class*="auth-delete-account"] .btn-danger,
+body:not(.admin-body)[class*="auth-delete-account"] button.danger,
+body:not(.admin-body)[class*="auth-delete-account"] button[name*="delete"],
+body:not(.admin-body)[class*="auth-delete-account"] input[type="submit"],
+body:not(.admin-body).page-auth-delete-account-php .btn-danger,
+body:not(.admin-body).page-auth-delete-account-php button.danger,
+body:not(.admin-body).page-auth-delete-account-php button[name*="delete"],
+body:not(.admin-body) .delete-account-page .btn-danger,
+body:not(.admin-body) .account-delete-page .btn-danger {
+  min-height: 48px !important;
+  padding-inline: 22px !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  border: 1px solid rgba(185, 28, 28, 0.25) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.22) !important;
+  font-weight: 900 !important;
+}
+
+body:not(.admin-body)[class*="auth-delete-account"] .btn-danger:hover,
+body:not(.admin-body)[class*="auth-delete-account"] button.danger:hover,
+body:not(.admin-body)[class*="auth-delete-account"] button[name*="delete"]:hover,
+body:not(.admin-body)[class*="auth-delete-account"] input[type="submit"]:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 18px 36px rgba(220, 38, 38, 0.28) !important;
+}
+
+
+/* =========================================================
+   6) DARK MODE SUPPORT
+   ---------------------------------------------------------
+   Same layout, but colors become softer for dark theme.
+========================================================= */
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu {
+  background: var(--card, #1d212b) !important;
+  border-color: rgba(255, 255, 255, 0.11) !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-profile-menu-head {
+  background: rgba(169, 156, 255, 0.08) !important;
+  border-color: rgba(169, 156, 255, 0.18) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a {
+  color: var(--foreground, #f4f7fb) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a small {
+  color: var(--muted-foreground, #a9b4c3) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a:hover {
+  background: rgba(169, 156, 255, 0.08) !important;
+  border-color: rgba(169, 156, 255, 0.18) !important;
+}
+
+/* Dark delete sidebar item */
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a.danger {
+  color: #fecaca !important;
+  background:
+    linear-gradient(135deg, rgba(69, 10, 10, 0.72), rgba(30, 16, 20, 0.9)) !important;
+  border-color: rgba(248, 113, 113, 0.23) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a.danger span {
+  color: #fecaca !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a.danger small {
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .user-shell-profile-menu a.danger::after {
+  color: #fecaca !important;
+  background: rgba(248, 113, 113, 0.14) !important;
+  border-color: rgba(248, 113, 113, 0.24) !important;
+}
+
+/* Dark main profile delete card */
+[data-theme="dark"] body:not(.admin-body) .profile-action-item.danger,
+[data-theme="dark"] body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] {
+  color: #fecaca !important;
+  background:
+    linear-gradient(135deg, rgba(69, 10, 10, 0.78), rgba(30, 16, 20, 0.92)),
+    var(--card, #1d212b) !important;
+  border-color: rgba(248, 113, 113, 0.24) !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.24) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .profile-action-item.danger strong,
+[data-theme="dark"] body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] strong {
+  color: #fecaca !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .profile-action-item.danger span:not(.profile-action-arrow),
+[data-theme="dark"] body:not(.admin-body) a.profile-action-item[href*="delete-account.php"] span:not(.profile-action-arrow) {
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] body:not(.admin-body) .profile-action-item.danger::after,
+[data-theme="dark"] body:not(.admin-body) a.profile-action-item[href*="delete-account.php"]::after {
+  color: #fecaca !important;
+  background: rgba(248, 113, 113, 0.14) !important;
+  border-color: rgba(248, 113, 113, 0.24) !important;
+}
+
+/* Dark delete page */
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] .panel,
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] .card,
+[data-theme="dark"] body:not(.admin-body).page-auth-delete-account-php .panel {
+  border-color: rgba(248, 113, 113, 0.22) !important;
+}
+
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] h1,
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] h2,
+[data-theme="dark"] body:not(.admin-body).page-auth-delete-account-php h1 {
+  color: #fecaca !important;
+}
+
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] .alert,
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] .warning-box,
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] .delete-warning,
+[data-theme="dark"] body:not(.admin-body)[class*="auth-delete-account"] .danger-zone {
+  color: #fecaca !important;
+  background: rgba(248, 113, 113, 0.08) !important;
+  border-color: rgba(248, 113, 113, 0.2) !important;
+}
+
+
+/* =========================================================
+   7) RESPONSIVE FIXES
+   ---------------------------------------------------------
+   Prevents cramped text and removes the warning circle on
+   very small screens.
+========================================================= */
 
 @media (max-width: 640px) {
-  .pm-password-row {
-    flex-direction: column;
-    align-items: stretch;
+  body:not(.admin-body) .user-shell-profile-menu a {
+    min-height: 54px !important;
+    padding: 11px 12px !important;
+    border-radius: 13px !important;
   }
 
-  .pm-toggle-pass {
-    width: 100%;
+  body:not(.admin-body) .user-shell-profile-menu a.danger::after {
+    display: none !important;
   }
-}
-/* =========================================================
-   DELETE ACCOUNT
-========================================================= */
 
-.pm-danger-card {
-  border-color: rgba(239, 68, 68, 0.16);
-}
+  body:not(.admin-body) .user-shell-profile-menu a.danger span,
+  body:not(.admin-body) .user-shell-profile-menu a.danger small {
+    padding-right: 0 !important;
+  }
 
-.pm-danger-note {
-  margin-bottom: 18px;
-  padding: 16px 18px;
-  border-radius: 16px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.14);
-}
+  body:not(.admin-body) .profile-action-item {
+    min-height: 68px !important;
+    padding: 14px !important;
+    border-radius: 17px !important;
+  }
 
-.pm-danger-note h3 {
-  margin: 0 0 10px;
-  font-size: 0.98rem;
-  color: #fecaca;
-}
-
-.pm-danger-note ul {
-  margin: 0;
-  padding-left: 18px;
-  color: rgba(254, 226, 226, 0.88);
-}
-
-.pm-danger-note li {
-  margin-bottom: 6px;
-  font-size: 0.93rem;
-}
-
-.pm-danger-note li:last-child {
-  margin-bottom: 0;
-}
-/* =========================================================
-   DELETE ACCOUNT - BALANCED SIZE
-========================================================= */
-
-.pm-settings-shell {
-  padding-top: 10px;
-}
-
-.pm-settings-shell-narrow {
-  max-width: 760px;
-}
-
-.pm-settings-shell-narrow .pm-settings-card {
-  padding: 26px;
-}
-
-.pm-settings-shell-narrow .pm-settings-head {
-  margin-bottom: 18px;
-}
-
-.pm-settings-shell-narrow .pm-settings-title {
-  font-size: clamp(2.2rem, 3.5vw, 2.9rem);
-  margin-bottom: 8px;
-}
-
-.pm-settings-shell-narrow .pm-settings-subtitle {
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 580px;
-}
-
-.pm-danger-note {
-  margin-bottom: 18px;
-  padding: 16px 18px;
-  border-radius: 16px;
-}
-
-.pm-danger-note h3 {
-  margin-bottom: 10px;
-  font-size: 1rem;
-}
-
-.pm-danger-note li {
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-
-.pm-settings-form {
-  gap: 18px;
-}
-
-.pm-settings-field label {
-  margin-bottom: 8px;
-  font-size: 1rem;
-}
-
-.pm-settings-help {
-  margin-top: 8px;
-  font-size: 0.95rem;
-}
-
-.pm-settings-actions {
-  padding-top: 4px;
-}
-
-.pm-settings-actions .btn {
-  min-width: 170px;
-  padding: 0.82rem 1.1rem;
-}
-
-/* ===== Fix layout for profile pages ===== */
-
-.container.section {
-  width: min(900px, 100%);
-  margin: 0;
-}
-
-.has-user-sidebar .container.section {
-  margin-left: 0;
-  padding-left: 0;
-}
-
-/* push content nicely from sidebar */
-.user-shell-main .container.section {
-  margin-left: 10px;
+  body:not(.admin-body) .profile-action-item.danger::after,
+  body:not(.admin-body) a.profile-action-item[href*="delete-account.php"]::after {
+    display: none !important;
+  }
 }

@@ -25,30 +25,65 @@ function cb_plain_page(string $type, string $title, string $message, ?array $boo
             .wrap{max-width:760px;margin:48px auto;padding:0 16px;}
             .card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(15,23,42,.12);}
             .badge{display:inline-block;padding:7px 12px;border-radius:999px;font-weight:700;margin-bottom:14px;}
-            .success{background:#dcfce7;color:#166534;}.error{background:#fee2e2;color:#991b1b;}
-            h1{margin:0 0 12px;font-size:28px;} p{margin:8px 0;color:#374151;}
-            table{width:100%;border-collapse:collapse;margin-top:18px;} th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;} th{width:160px;color:#475569;}
-            .actions{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}.btn{display:inline-block;text-decoration:none;border-radius:10px;padding:11px 16px;font-weight:700}.primary{background:#4f46e5;color:#fff}.secondary{border:1px solid #cbd5e1;color:#111827;background:#fff}
-            .qr{margin-top:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}.qr img{width:180px;height:180px;object-fit:contain;border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:8px;}
+            .success{background:#dcfce7;color:#166534;}
+            .error{background:#fee2e2;color:#991b1b;}
+            h1{margin:0 0 12px;font-size:28px;}
+            p{margin:8px 0;color:#374151;}
+            table{width:100%;border-collapse:collapse;margin-top:18px;}
+            th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;}
+            th{width:160px;color:#475569;}
+            .actions{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;}
+            .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;border-radius:10px;padding:11px 16px;font-weight:700;border:0;cursor:pointer;}
+            .primary{background:#4f46e5;color:#fff;}
+            .secondary{border:1px solid #cbd5e1;color:#111827;background:#fff;}
+            .qr{margin-top:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+            .qr img{width:180px;height:180px;object-fit:contain;border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:8px;}
+            .qr-info{min-width:220px;}
+            .qr-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;}
+            .qr-download{display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;border-radius:10px;padding:10px 14px;font-weight:700;background:#4f46e5;color:#fff;}
+            .qr-download:hover{background:#4338ca;}
+            .qr-download svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
             pre{white-space:pre-wrap;background:#111827;color:#f8fafc;padding:14px;border-radius:10px;overflow:auto;margin-top:16px;font-size:13px;}
         </style>
     </head>
     <body>
     <main class="wrap">
         <section class="card">
-            <span class="badge <?= $isSuccess ? 'success' : 'error' ?>"><?= $isSuccess ? 'Success' : 'Error' ?></span>
+            <span class="badge <?= $isSuccess ? 'success' : 'error' ?>">
+                <?= $isSuccess ? 'Success' : 'Error' ?>
+            </span>
+
             <h1><?= cb_html($title) ?></h1>
             <p><?= cb_html($message) ?></p>
 
             <?php if ($booking): ?>
                 <table>
-                    <tr><th>Booking ID</th><td>#<?= (int)($booking['id'] ?? 0) ?></td></tr>
-                    <tr><th>Event</th><td><?= cb_html($booking['event_title'] ?? 'Event') ?></td></tr>
-                    <tr><th>Quantity</th><td><?= (int)($booking['quantity'] ?? 1) ?></td></tr>
-                    <tr><th>Amount</th><td>Rs. <?= number_format((float)($booking['amount'] ?? 0), 2) ?></td></tr>
-                    <tr><th>Status</th><td><?= cb_html($booking['status'] ?? '') ?></td></tr>
+                    <tr>
+                        <th>Booking ID</th>
+                        <td>#<?= (int)($booking['id'] ?? 0) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Event</th>
+                        <td><?= cb_html($booking['event_title'] ?? 'Event') ?></td>
+                    </tr>
+                    <tr>
+                        <th>Quantity</th>
+                        <td><?= (int)($booking['quantity'] ?? 1) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Amount</th>
+                        <td>Rs. <?= number_format((float)($booking['amount'] ?? 0), 2) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td><?= cb_html($booking['status'] ?? '') ?></td>
+                    </tr>
+
                     <?php if (!empty($booking['khalti_ref_id'])): ?>
-                        <tr><th>Khalti Ref</th><td><?= cb_html($booking['khalti_ref_id']) ?></td></tr>
+                        <tr>
+                            <th>Khalti Ref</th>
+                            <td><?= cb_html($booking['khalti_ref_id']) ?></td>
+                        </tr>
                     <?php endif; ?>
                 </table>
             <?php endif; ?>
@@ -56,16 +91,41 @@ function cb_plain_page(string $type, string $title, string $message, ?array $boo
             <?php if ($isSuccess): ?>
                 <h2 style="margin-top:24px;">Event booked successfully</h2>
                 <p>Your payment has been received and your booking is confirmed.</p>
+
                 <?php if ($qrUrl): ?>
+                    <?php
+                        $qrDownloadName = 'eventhub-ticket-' . (int)($booking['id'] ?? 0) . '.png';
+                    ?>
+
                     <div class="qr">
                         <img src="<?= cb_html($qrUrl) ?>" alt="Booking QR Ticket">
-                        <div>
+
+                        <div class="qr-info">
                             <strong>QR ticket generated.</strong>
                             <p>Show this QR code at the event entrance.</p>
+
+                            <div class="qr-actions">
+                                <a
+                                    class="qr-download"
+                                    href="<?= cb_html($qrUrl) ?>"
+                                    download="<?= cb_html($qrDownloadName) ?>"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 3v12"></path>
+                                        <path d="m7 10 5 5 5-5"></path>
+                                        <path d="M5 21h14"></path>
+                                    </svg>
+                                    <span>Download QR</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <p><strong>Note:</strong> Booking is confirmed, but QR generation could not complete. Check My Bookings or run Composer/database fixes.</p>
+                    <p>
+                        <strong>Note:</strong>
+                        Booking is confirmed, but QR generation could not complete.
+                        Check My Bookings or run Composer/database fixes.
+                    </p>
                 <?php endif; ?>
             <?php endif; ?>
 
@@ -74,8 +134,13 @@ function cb_plain_page(string $type, string $title, string $message, ?array $boo
             <?php endif; ?>
 
             <div class="actions">
-                <a class="btn primary" href="<?= cb_html($appUrl) ?>/bookings/my-bookings.php">Go to My Bookings</a>
-                <a class="btn secondary" href="<?= cb_html($appUrl) ?>/events/index.php">Browse Events</a>
+                <a class="btn primary" href="<?= cb_html($appUrl) ?>/bookings/my-bookings.php">
+                    Go to My Bookings
+                </a>
+
+                <a class="btn secondary" href="<?= cb_html($appUrl) ?>/events/index.php">
+                    Browse Events
+                </a>
             </div>
         </section>
     </main>
@@ -90,7 +155,14 @@ try {
     require_once __DIR__ . '/../includes/booking.php';
     require_once __DIR__ . '/../includes/qr.php';
 } catch (Throwable $e) {
-    cb_plain_page('error', 'Callback boot failed', 'The callback could not load the project files.', null, null, $e->getMessage());
+    cb_plain_page(
+        'error',
+        'Callback boot failed',
+        'The callback could not load the project files.',
+        null,
+        null,
+        $e->getMessage()
+    );
 }
 
 function cb_payload(): array
@@ -105,6 +177,7 @@ function cb_transaction_id(array $payload): string
             return trim((string)$payload[$key]);
         }
     }
+
     return '';
 }
 
@@ -116,19 +189,41 @@ try {
     $transactionId = cb_transaction_id($payload);
 
     if ($pidx === '') {
-        cb_plain_page('error', 'Missing Khalti PIDX', 'Khalti returned to the site without a pidx value. Please retry payment from My Bookings.', null, null, json_encode($payload, JSON_PRETTY_PRINT));
+        cb_plain_page(
+            'error',
+            'Missing Khalti PIDX',
+            'Khalti returned to the site without a pidx value. Please retry payment from My Bookings.',
+            null,
+            null,
+            json_encode($payload, JSON_PRETTY_PRINT)
+        );
     }
 
     if (strcasecmp($status, 'Completed') !== 0) {
-        cb_plain_page('error', 'Payment not completed', 'Khalti did not return Completed status. Current status: ' . ($status ?: 'Unknown'), null, null, json_encode($payload, JSON_PRETTY_PRINT));
+        cb_plain_page(
+            'error',
+            'Payment not completed',
+            'Khalti did not return Completed status. Current status: ' . ($status ?: 'Unknown'),
+            null,
+            null,
+            json_encode($payload, JSON_PRETTY_PRINT)
+        );
     }
 
     $pdo = db();
     $booking = null;
 
-    // First try exact Khalti PIDX match. If the old database has no khalti_pidx column, fall back to purchase_order_id and show a clear warning only if update fails later.
+    // First try exact Khalti PIDX match.
+    // If the old database has no khalti_pidx column, fall back to purchase_order_id.
     try {
-        $stmt = $pdo->prepare('SELECT b.*, e.title AS event_title FROM bookings b INNER JOIN events e ON e.id = b.event_id WHERE b.khalti_pidx = :pidx LIMIT 1');
+        $stmt = $pdo->prepare(
+            'SELECT b.*, e.title AS event_title
+             FROM bookings b
+             INNER JOIN events e ON e.id = b.event_id
+             WHERE b.khalti_pidx = :pidx
+             LIMIT 1'
+        );
+
         $stmt->execute(['pidx' => $pidx]);
         $booking = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     } catch (Throwable $e) {
@@ -136,19 +231,43 @@ try {
     }
 
     if (!$booking && $purchaseOrderId > 0) {
-        $stmt = $pdo->prepare('SELECT b.*, e.title AS event_title FROM bookings b INNER JOIN events e ON e.id = b.event_id WHERE b.id = :id LIMIT 1');
+        $stmt = $pdo->prepare(
+            'SELECT b.*, e.title AS event_title
+             FROM bookings b
+             INNER JOIN events e ON e.id = b.event_id
+             WHERE b.id = :id
+             LIMIT 1'
+        );
+
         $stmt->execute(['id' => $purchaseOrderId]);
         $booking = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     if (!$booking) {
-        cb_plain_page('error', 'Booking not found', 'Payment was completed, but the booking record could not be found. Check purchase_order_id and booking table.', null, null, json_encode($payload, JSON_PRETTY_PRINT));
+        cb_plain_page(
+            'error',
+            'Booking not found',
+            'Payment was completed, but the booking record could not be found. Check purchase_order_id and booking table.',
+            null,
+            null,
+            json_encode($payload, JSON_PRETTY_PRINT)
+        );
     }
 
     $expectedAmount = (int)round((float)$booking['amount'] * 100);
-    $returnedAmount = isset($payload['amount']) && is_numeric($payload['amount']) ? (int)$payload['amount'] : null;
+    $returnedAmount = isset($payload['amount']) && is_numeric($payload['amount'])
+        ? (int)$payload['amount']
+        : null;
+
     if ($returnedAmount !== null && $expectedAmount > 0 && $returnedAmount !== $expectedAmount) {
-        cb_plain_page('error', 'Payment amount mismatch', 'Khalti amount does not match the booking amount. Booking was not confirmed.', $booking, null, "Expected paisa: {$expectedAmount}\nReturned paisa: {$returnedAmount}");
+        cb_plain_page(
+            'error',
+            'Payment amount mismatch',
+            'Khalti amount does not match the booking amount. Booking was not confirmed.',
+            $booking,
+            null,
+            "Expected paisa: {$expectedAmount}\nReturned paisa: {$returnedAmount}"
+        );
     }
 
     if (($booking['status'] ?? '') !== 'Confirmed') {
@@ -158,28 +277,60 @@ try {
             $transactionId ?: $pidx,
             $payload
         );
+
         if ($confirmErrors) {
-            cb_plain_page('error', 'Booking confirmation failed',
+            cb_plain_page(
+                'error',
+                'Booking confirmation failed',
                 'Payment was received, but the booking could not be confirmed: ' . implode(' ', $confirmErrors),
-                $booking, null, null);
+                $booking,
+                null,
+                null
+            );
         }
     }
 
-    $stmt = $pdo->prepare('SELECT b.*, e.title AS event_title FROM bookings b INNER JOIN events e ON e.id = b.event_id WHERE b.id = :id LIMIT 1');
+    $stmt = $pdo->prepare(
+        'SELECT b.*, e.title AS event_title
+         FROM bookings b
+         INNER JOIN events e ON e.id = b.event_id
+         WHERE b.id = :id
+         LIMIT 1'
+    );
+
     $stmt->execute(['id' => (int)$booking['id']]);
     $booking = $stmt->fetch(PDO::FETCH_ASSOC) ?: $booking;
 
-    // Persist khalti_pidx if booking was looked up by purchase_order_id
+    // Persist khalti_pidx if booking was looked up by purchase_order_id.
     try {
-        $pdo->prepare("UPDATE bookings SET khalti_pidx = :pidx WHERE id = :id AND (khalti_pidx IS NULL OR khalti_pidx = '')")
-            ->execute(['pidx' => $pidx, 'id' => (int)$booking['id']]);
-    } catch (Throwable $ignored) {}
+        $pdo->prepare(
+            "UPDATE bookings
+             SET khalti_pidx = :pidx
+             WHERE id = :id
+             AND (khalti_pidx IS NULL OR khalti_pidx = '')"
+        )->execute([
+            'pidx' => $pidx,
+            'id' => (int)$booking['id'],
+        ]);
+    } catch (Throwable $ignored) {
+    }
 
-    $qrUrl = !empty($booking['qr_image_path']) ? (string)$booking['qr_image_path'] : null;
+    $qrUrl = !empty($booking['qr_image_path'])
+        ? (string)$booking['qr_image_path']
+        : null;
+
     if (!$qrUrl) {
         try {
             $qrUrl = ensure_booking_qr((int)$booking['id']);
-            $stmt = $pdo->prepare('SELECT b.*, e.title AS event_title FROM bookings b INNER JOIN events e ON e.id = b.event_id WHERE b.id = :id LIMIT 1');
+
+            $stmt = $pdo->prepare(
+                'SELECT b.*, e.title AS event_title
+                 FROM bookings b
+                 INNER JOIN events e ON e.id = b.event_id
+                 WHERE b.id = :id
+                 LIMIT 1'
+            );
+
             $stmt->execute(['id' => (int)$booking['id']]);
             $booking = $stmt->fetch(PDO::FETCH_ASSOC) ?: $booking;
         } catch (Throwable $e) {
@@ -188,7 +339,21 @@ try {
         }
     }
 
-        cb_plain_page('success', 'Payment successful', 'Event booked successfully.', $booking, $qrUrl, !empty($booking['_qr_error']) ? 'QR warning: ' . $booking['_qr_error'] : null);
+    cb_plain_page(
+        'success',
+        'Payment successful',
+        'Event booked successfully.',
+        $booking,
+        $qrUrl,
+        !empty($booking['_qr_error']) ? 'QR warning: ' . $booking['_qr_error'] : null
+    );
 } catch (Throwable $e) {
-    cb_plain_page('error', 'Payment callback failed', 'The callback crashed while handling Khalti response. The exact error is shown below.', null, null, $e->getMessage());
+    cb_plain_page(
+        'error',
+        'Payment callback failed',
+        'The callback crashed while handling Khalti response. The exact error is shown below.',
+        null,
+        null,
+        $e->getMessage()
+    );
 }

@@ -1,7 +1,6 @@
 @import url("./base-core.css");
 
 /* Center the entire privacy page */
-
 .container.section {
   display: flex;
   justify-content: center;

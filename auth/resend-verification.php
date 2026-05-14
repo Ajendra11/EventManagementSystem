@@ -1,6 +1,6 @@
 <?php
-require_once DIR . '/../includes/layout.php';
-require_once DIR . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/layout.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 $errors = [];
 if (is_post()) {
