@@ -1,0 +1,42 @@
+@import url("./base-core.css");
+
+.contact-page .grid-2 {
+  gap: 2rem;
+}
+
+.contact-page .panel:first-child {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.contact-page .panel a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.contact-page .panel a:hover {
+  text-decoration: underline;
+}
+
+.contact-page .panel:last-child p {
+  margin-bottom: 1rem;
+}
+
+.contact-page textarea {
+  resize: none;
+  height: 180px;
+  max-height: 180px;
+  min-height: 180px;
+}
+
+@media (max-width: 768px) {
+  .contact-page .grid-2 {
+    gap: 1rem;
+  }
+
+  .contact-page textarea {
+    height: 150px;
+    max-height: 150px;
+    min-height: 150px;
+  }
+}

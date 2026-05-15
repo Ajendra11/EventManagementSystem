@@ -10,40 +10,40 @@ function current_page_stylesheet(): ?string
     $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 
     $map = [
-        '/index.php' => 'browse-events.css',
-        '/events/index.php' => 'browse-events.css',
-        '/events/show.php' => 'event-details.css',
+    '/index.php' => 'browse-events.css',
+    '/events/index.php' => 'browse-events.css',
+    '/events/show.php' => 'event-details.css',
 
-        '/auth/login.php' => 'login.css',
-        '/auth/register.php' => 'register.css',
-        '/auth/forgot-password.php' => 'login.css',
-        '/auth/reset-password.php' => 'login.css',
-        '/auth/resend-verification.php' => 'login.css',
-        '/auth/verify-email.php' => 'login.css',
-        '/auth/profile.php' => 'profile.css',
-        '/auth/manage-profile.php' => 'profile.css',
-        '/auth/password-security.php' => 'profile.css',
-        '/auth/delete-account.php' => 'profile.css',
+    '/auth/login.php' => 'login.css',
+    '/auth/register.php' => 'register.css',
+    '/auth/forgot-password.php' => 'login.css',
+    '/auth/reset-password.php' => 'login.css',
+    '/auth/resend-verification.php' => 'login.css',
+    '/auth/verify-email.php' => 'login.css',
+    '/auth/profile.php' => 'profile.css',
+    '/auth/manage-profile.php' => 'profile.css',
+    '/auth/password-security.php' => 'profile.css',
+    '/auth/delete-account.php' => 'profile.css',
 
-        '/bookings/my-bookings.php' => 'my-bookings.css',
+    '/bookings/my-bookings.php' => 'my-bookings.css',
 
-        '/reviews/create.php' => 'profile.css',
-        '/reviews/my-reviews.php' => 'profile.css',
+    '/reviews/create.php' => 'profile.css',
+    '/reviews/my-reviews.php' => 'profile.css',
 
-        '/payments/checkout.php' => 'my-bookings.css',
-        '/tickets/verify.php' => 'my-bookings.css',
+    '/payments/checkout.php' => 'my-bookings.css',
+    '/tickets/verify.php' => 'my-bookings.css',
 
-        '/admin/login.php' => 'admin-login.css',
-        '/admin/index.php' => 'admin-dashboard.css',
-        '/admin/events.php' => 'admin-events.css',
-        '/admin/events_form.php' => 'admin-events-form.css',
-        '/admin/bookings.php' => 'admin-bookings.css',
-        '/admin/users.php' => 'admin-users.css',
-        '/admin/reviews.php' => 'admin-bookings.css',
+    '/admin/login.php' => 'admin-login.css',
+    '/admin/index.php' => 'admin-dashboard.css',
+    '/admin/events.php' => 'admin-events.css',
+    '/admin/events_form.php' => 'admin-events-form.css',
+    '/admin/bookings.php' => 'admin-bookings.css',
+    '/admin/users.php' => 'admin-users.css',
+    '/admin/reviews.php' => 'admin-bookings.css',
 
-        '/privacy.php' => 'privacy.css',
-    ];
-
+    '/privacy.php' => 'privacy.css',
+    '/contact.php' => 'contact.css',
+];
     foreach ($map as $suffix => $stylesheet) {
         if (str_ends_with($script, $suffix)) {
             return $stylesheet;
@@ -176,6 +176,14 @@ function render_header(string $title = APP_NAME): void
                     </a>
 
                     <a
+                        href="<?= APP_URL ?>/contact.php"
+                        class="user-shell-link <?= str_contains($currentPath, '/contact.php') ? 'active' : '' ?>"
+                        <?= str_contains($currentPath, '/contact.php') ? 'aria-current="page"' : '' ?>
+                    >
+                        <span>Contact</span>
+                    </a>
+
+                    <a
                         href="<?= APP_URL ?>/bookings/my-bookings.php"
                         class="user-shell-link <?= str_contains($currentPath, '/bookings/my-bookings.php') ? 'active' : '' ?>"
                         <?= str_contains($currentPath, '/bookings/my-bookings.php') ? 'aria-current="page"' : '' ?>
@@ -290,6 +298,7 @@ function render_header(string $title = APP_NAME): void
 
                 <nav class="nav-links" aria-label="Main navigation">
                     <a href="<?= APP_URL ?>/events/index.php">Events</a>
+                    <a href="<?= APP_URL ?>/contact.php">Contact</a>
 
                     <button
                         type="button"
@@ -353,6 +362,7 @@ function render_footer(): void
                 <div>
                     <h4>Quick links</h4>
                     <a href="<?= APP_URL ?>/events/index.php">Browse Events</a>
+                    <a href="<?= APP_URL ?>/contact.php">Contact Us</a>
                     <a href="<?= APP_URL ?>/auth/register.php">Join Now</a>
                     <a href="<?= APP_URL ?>/auth/login.php">Sign In</a>
                     <a href="<?= APP_URL ?>/privacy.php">Privacy Policy</a>
